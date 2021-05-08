@@ -3,11 +3,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python=3.9
   - pip=20.1
   - uproot=4.0
   - pip:
     - jedi==0.17.2
-    - lumin==0.8.0
+    - lumin==0.7.2
     - matplotlib
     - numba
     - pandas
