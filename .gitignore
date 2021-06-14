@@ -1,0 +1,3 @@
+mlruns/*
+outputs/*
+.ipynb*

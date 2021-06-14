@@ -1,0 +1,25 @@
+name: htt-ml
+channels:
+  - conda-forge
+  - defaults
+  - pytorch
+dependencies:
+  - python=3.9
+  - pip
+  - jupyterlab
+  - mlflow
+  - matplotlib
+  - seaborn
+  - numpy
+  - numba
+  - pandas
+  - scipy
+  - statsmodels
+  - scikit-learn
+  - lightgbm
+  - pytorch
+  - uproot
+  - pip:
+    - jedi==0.17.2
+    - lumin==0.7.2
+    - hydra-core>=1.1.0
