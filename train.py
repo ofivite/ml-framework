@@ -25,7 +25,7 @@ sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 2.5})
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-@hydra.main(config_path=".", config_name="training_cfg")
+@hydra.main(config_path="configs", config_name="training_cfg")
 def main(cfg: DictConfig) -> None:
     # enable auto logging
     mlflow.lightgbm.autolog()

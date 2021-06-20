@@ -1,0 +1,50 @@
+year: 2018
+sample_paths:
+  ggH: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS/mt-NOMINAL_ntuple_GluGluHToUncorrTauTau_{year}.root
+  DY: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS/mt-NOMINAL_ntuple_DYJets_{year}.root
+sample_to_class:
+  DY: 0
+  ggH: 1
+
+tree_name: TauCheck
+branches:
+  - pt_1
+  - pt_2
+  - jpt_1
+  - jpt_2
+  - dijetpt
+  - jdeta
+  - njets
+  - m_fast
+  - mjj
+  - m_vis
+  - puppimt_1
+  - pt_tt
+  - puppimet
+cont_features:
+  - pt_1
+  - pt_2
+  - jpt_1
+  - jpt_2
+  - dijetpt
+  - jdeta
+  - m_fast
+  - mjj
+  - m_vis
+  - puppimt_1
+  - pt_tt
+  - puppimet
+cat_features:
+  - njets
+weight_name: weight
+target_name: target
+
+train_size: 0.8
+norm: True
+pca: False
+n_folds: 10
+
+output_folder: data
+train_name: 'train'
+test_name: 'test'
+pipe_name: 'input_pipe'
