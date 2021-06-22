@@ -27,7 +27,7 @@ sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 2.5})
 
 @hydra.main(config_path="configs", config_name="training_cfg")
 def main(cfg: DictConfig) -> None:
-    # enable auto logging
+    # enable auto logging for mlflow
     mlflow.lightgbm.autolog()
 
     # feature names to be used in training
@@ -48,16 +48,17 @@ def main(cfg: DictConfig) -> None:
     with mlflow.start_run():
         model = lgb.train(OmegaConf.to_object(cfg.model_param), train_data, valid_sets=[train_data, validation_data])
         y_proba_test = model.predict(test_df[train_features])
-        y_pred_test = y_proba_test > 0.5
-        loss = log_loss(test_df[target_feature], y_proba_test)
-        acc = accuracy_score(test_df[target_feature], y_pred_test)
-        mlflow.log_metrics({"log_loss": loss, "accuracy": acc})
+        if cfg.model_param.objective == 'binary':
+            y_pred_test = y_proba_test > 0.5
+            loss = log_loss(test_df[target_feature], y_proba_test)
+            acc = accuracy_score(test_df[target_feature], y_pred_test)
+            mlflow.log_metrics({"log_loss": loss, "accuracy": acc})
 
-        fig, ax = plt.subplots()
-        plt.hist(y_proba_test[test_df[target_feature]==0], alpha=0.4, bins=30, density=True, label='bkgr')
-        plt.hist(y_proba_test[test_df[target_feature]==1], alpha=0.4, bins=30, density=True, label='sig')
-        plt.legend()
-        mlflow.log_figure(fig, "figure.png")
+            fig, ax = plt.subplots()
+            plt.hist(y_proba_test[test_df[target_feature]==0], alpha=0.4, bins=30, density=True, label='bkgr')
+            plt.hist(y_proba_test[test_df[target_feature]==1], alpha=0.4, bins=30, density=True, label='sig')
+            plt.legend()
+            mlflow.log_figure(fig, "figure.png")
 
 if __name__ == '__main__':
     main()

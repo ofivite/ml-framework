@@ -7,3 +7,7 @@ entry_points:
       test_file: {type: str, default: "data/test.hdf5"}
       pipe_file: {type: str, default: "data/input_pipe.pkl"}
     command: "python train.py"
+  multi:
+    parameters:
+      num_iterations: {type: int, default: 10}
+    command: "python train.py model_param.objective=multiclass +model_param.num_class=3 model_param.metric=multi_logloss model_param.num_iterations={num_iterations}"
