@@ -30,17 +30,17 @@ def main(cfg: DictConfig) -> None:
 
     # combine all data samples into single pandas dataframe
     data_samples = {}
-    for sample_name, sample_path in cfg.sample_paths.items():
-        sample_path = fill_placeholders(sample_path, {'{year}': cfg.year})
-        print(f'loading {sample_name}...')
-        data_samples[sample_name] = uproot.open(sample_path)[cfg.tree_name].arrays(cfg.branches, library='pd')
-        data_samples[sample_name]['sample_name'] = sample_name
+    for process_name, process_path in cfg.process_to_file.items():
+        process_path = fill_placeholders(process_path, {'{year}': cfg.year})
+        print(f'loading {process_name}...')
+        data_samples[process_name] = uproot.open(process_path)[cfg.tree_name].arrays(cfg.branches, cut=cfg.process_to_cut[process_name], library='pd')
+        data_samples[process_name]['process_name'] = process_name
     data = pd.concat(data_samples, ignore_index=True)
 
     # assign target label to each sample according to a map from cfg file
     target = cfg.target_name
-    data[target] = data['sample_name'].map(cfg.sample_to_class)
-    data.drop(columns='sample_name', inplace=True)
+    data[target] = data['process_name'].map(cfg.process_to_class)
+    data.drop(columns='process_name', inplace=True)
 
     # some preprocessing
     data.replace([np.inf, -np.inf], np.nan, inplace=True) # lumin handles nans automatically
@@ -59,12 +59,11 @@ def main(cfg: DictConfig) -> None:
     cat_maps, cat_szs = proc_cats(train_df, cat_features, test_df)
 
     # derive weights accounting for imbalance in data
-    w_scaling_mult = 1e6
     weight = cfg.weight_name
     train_df[weight], test_df[weight] = 1, 1
-    for class_label in set(cfg.sample_to_class.values()):
-        train_df.loc[train_df[target] == class_label, weight] *= (w_scaling_mult/np.sum(train_df.loc[train_df[target] == class_label, weight]))
-        test_df.loc[test_df[target] == class_label, weight] *= (w_scaling_mult/np.sum(test_df.loc[test_df[target] == class_label, weight]))
+    for class_label in set(cfg.process_to_class.values()):
+        train_df.loc[train_df[target] == class_label, weight] *= (cfg.weight_multiplier/np.sum(train_df.loc[train_df[target] == class_label, weight]))
+        test_df.loc[test_df[target] == class_label, weight] *= (cfg.weight_multiplier/np.sum(test_df.loc[test_df[target] == class_label, weight]))
 
     # check_val_set(train_df[train_features], val_df[train_features], test_df[train_features])
 

@@ -1,10 +1,13 @@
 year: 2018
-sample_paths:
+process_to_file:
   ggH: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS/mt-NOMINAL_ntuple_GluGluHToUncorrTauTau_{year}.root
-  DY: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS/mt-NOMINAL_ntuple_DYJets_{year}.root
-sample_to_class:
-  DY: 0
+  ZTT: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS/mt-NOMINAL_ntuple_DYJets_{year}.root
+process_to_class:
   ggH: 1
+  ZTT: 0
+process_to_cut:
+  ggH: '(byMediumDeepTau2017v2p1VSjet_2 > 0.5) & (iso_1 < 0.15) & (os > 0.5)'
+  ZTT: '(byMediumDeepTau2017v2p1VSjet_2 > 0.5) & (iso_1 < 0.15) & (os > 0.5) & (gen_match_1 == 4) & (gen_match_2 == 5)'
 
 tree_name: TauCheck
 branches:
@@ -42,6 +45,7 @@ target_name: target
 train_size: 0.8
 norm: True
 pca: False
+weight_multiplier: 1e3
 n_folds: 10
 
 output_folder: data
