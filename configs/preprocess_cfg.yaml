@@ -1,13 +1,61 @@
 year: 2018
-process_to_file:
-  ggH: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS/mt-NOMINAL_ntuple_GluGluHToUncorrTauTau_{year}.root
-  ZTT: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS/mt-NOMINAL_ntuple_DYJets_{year}.root
-process_to_class:
-  ggH: 1
-  ZTT: 0
-process_to_cut:
-  ggH: '(byMediumDeepTau2017v2p1VSjet_2 > 0.5) & (iso_1 < 0.15) & (os > 0.5)'
-  ZTT: '(byMediumDeepTau2017v2p1VSjet_2 > 0.5) & (iso_1 < 0.15) & (os > 0.5) & (gen_match_1 == 4) & (gen_match_2 == 5)'
+input_path: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS
+process_to_cfg:
+  ggH:
+    filename: mt-NOMINAL_ntuple_GluGluHToUncorrTauTau_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5)'
+    class: 0
+  VBF:
+    filename: mt-NOMINAL_ntuple_VBFHToUncorrTauTau_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5)'
+    class: 0
+  ZTT:
+    filename: mt-NOMINAL_ntuple_DYJets_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_1==4) & (gen_match_2==5)'
+    class: 1
+  ZLL:
+    filename: mt-NOMINAL_ntuple_DYJets_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2!=6) & ((gen_match_1!=4) | (gen_match_2!=5))'
+    class: 2
+  ZJJ:
+    filename: mt-NOMINAL_ntuple_DYJets_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2 == 6)'
+    class: 2
+  TTT:
+    filename: mt-NOMINAL_ntuple_TTbar_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_1==4) & (gen_match_2==5)'
+    class: 1
+  TTL:
+    filename: mt-NOMINAL_ntuple_TTbar_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2!=6) & ((gen_match_1!=4) | (gen_match_2!=5))'
+    class: 2
+  TTJ:
+    filename: mt-NOMINAL_ntuple_TTbar_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2 == 6)'
+    class: 2
+  #
+  VVT:
+    filename: mt-NOMINAL_ntuple_Diboson_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_1==4) & (gen_match_2==5)'
+    class: 1
+  VVL:
+    filename: mt-NOMINAL_ntuple_Diboson_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2!=6) & ((gen_match_1!=4) | (gen_match_2!=5))'
+    class: 2
+  VVJ:
+    filename: mt-NOMINAL_ntuple_Diboson_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2 == 6)'
+    class: 2
+  WJets:
+    filename: mt-NOMINAL_ntuple_WJets_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5)'
+    class: 2
+  QCD:
+    filename: mt-NOMINAL_ntuple_SingleMuon_{year}.root
+    cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os<0.5)'
+    class: 2
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 tree_name: TauCheck
 branches:
@@ -24,6 +72,7 @@ branches:
   - puppimt_1
   - pt_tt
   - puppimet
+
 cont_features:
   - pt_1
   - pt_2
@@ -37,16 +86,22 @@ cont_features:
   - puppimt_1
   - pt_tt
   - puppimet
+
 cat_features:
   - njets
+
 weight_name: weight
 target_name: target
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 train_size: 0.8
 norm: True
 pca: False
-weight_multiplier: 1e3
+weight_multiplier: 1.0
 n_folds: 10
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 output_folder: data
 train_name: 'train'

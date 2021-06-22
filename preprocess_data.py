@@ -13,6 +13,7 @@ from lumin.data_processing.file_proc import df2foldfile
 from lumin.nn.data.fold_yielder import FoldYielder
 
 import pickle
+import gc
 import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
@@ -24,23 +25,22 @@ def fill_placeholders(string, placeholder_to_value):
 
 @hydra.main(config_path="configs", config_name="preprocess_cfg")
 def main(cfg: DictConfig) -> None:
-
     cat_features = OmegaConf.to_object(cfg.cat_features)
     cont_features = OmegaConf.to_object(cfg.cont_features)
+    input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
 
     # combine all data samples into single pandas dataframe
     data_samples = {}
-    for process_name, process_path in cfg.process_to_file.items():
-        process_path = fill_placeholders(process_path, {'{year}': cfg.year})
-        print(f'loading {process_name}...')
-        data_samples[process_name] = uproot.open(process_path)[cfg.tree_name].arrays(cfg.branches, cut=cfg.process_to_cut[process_name], library='pd')
-        data_samples[process_name]['process_name'] = process_name
-    data = pd.concat(data_samples, ignore_index=True)
-
-    # assign target label to each sample according to a map from cfg file
     target = cfg.target_name
-    data[target] = data['process_name'].map(cfg.process_to_class)
-    data.drop(columns='process_name', inplace=True)
+    for process_name, process_cfg in cfg.process_to_cfg.items():
+        print(f'loading {process_name}...')
+        process_filename = fill_placeholders(process_cfg['filename'], {'{year}': cfg.year})
+        process_path = f'{input_path}/{process_filename}'
+        with uproot.open(process_path) as f:
+            data_samples[process_name] = f[cfg.tree_name].arrays(cfg.branches, cut=process_cfg['cut'], library='pd')
+        data_samples[process_name][target] = process_cfg['class']
+    data = pd.concat(data_samples, ignore_index=True)
+    del(data_samples); gc.collect()
 
     # some preprocessing
     data.replace([np.inf, -np.inf], np.nan, inplace=True) # lumin handles nans automatically
@@ -61,7 +61,7 @@ def main(cfg: DictConfig) -> None:
     # derive weights accounting for imbalance in data
     weight = cfg.weight_name
     train_df[weight], test_df[weight] = 1, 1
-    for class_label in set(cfg.process_to_class.values()):
+    for class_label in set(data[target]):
         train_df.loc[train_df[target] == class_label, weight] *= (cfg.weight_multiplier/np.sum(train_df.loc[train_df[target] == class_label, weight]))
         test_df.loc[test_df[target] == class_label, weight] *= (cfg.weight_multiplier/np.sum(test_df.loc[test_df[target] == class_label, weight]))
 
