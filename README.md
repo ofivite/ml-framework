@@ -19,7 +19,7 @@ mlflow ui -p 5000
 In case of running on a remote machine and not being able to open a browser (as a GUI) there, one can listen to a remote server via ssh and interact with it on a local machine (e.g. laptop). The commands below (fill in {} the corresponding values) will make an ssh tunnel and forward remote port to a local one:
 ```bash
 SERVER=${USERNAME}@naf-cms${MACHINE_ID}.desy.de
-ssh -N -f -L localhost:${REMOTE_PORT}:localhost:${LOCAL_PORT} $SERVER 
+ssh -N -f -L localhost:${LOCAL_PORT}:localhost:${REMOTE_PORT} $SERVER 
 ```
 
 Then one can access `mlflow ui` locally by going to http://localhost:${LOCAL_PORT} in a browser.
