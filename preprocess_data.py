@@ -28,6 +28,7 @@ def main(cfg: DictConfig) -> None:
     cat_features = OmegaConf.to_object(cfg.cat_features)
     cont_features = OmegaConf.to_object(cfg.cont_features)
     input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
+    output_path = fill_placeholders(cfg.output_path, {'{year}': cfg.year})
 
     # combine all data samples into single pandas dataframe
     data_samples = {}
@@ -53,7 +54,7 @@ def main(cfg: DictConfig) -> None:
     train_df, test_df = train_test_split(data, train_size=cfg.train_size, stratify=data['strat_key'], random_state=1357)
 
     # apply normalisation
-    input_pipe = fit_input_pipe(train_df, cont_features, to_absolute_path(f'{cfg.output_folder}/{cfg.pipe_name}'), norm_in=cfg.norm, pca=cfg.pca)
+    input_pipe = fit_input_pipe(train_df, cont_features, to_absolute_path(f'{output_path}/{cfg.pipe_name}'), norm_in=cfg.norm, pca=cfg.pca)
     train_df[cont_features] = input_pipe.transform(train_df[cont_features])
     test_df[cont_features] = input_pipe.transform(test_df[cont_features])
     cat_maps, cat_szs = proc_cats(train_df, cat_features, test_df)
@@ -74,7 +75,7 @@ def main(cfg: DictConfig) -> None:
                 cat_feats=cat_features, cat_maps=cat_maps,
                 targ_feats=target, targ_type='int',
                 wgt_feat=weight,
-                savename=to_absolute_path(f'{cfg.output_folder}/{cfg.train_name}')
+                savename=to_absolute_path(f'{output_path}/{cfg.train_name}')
                 )
 
     df2foldfile(df=test_df,
@@ -83,7 +84,7 @@ def main(cfg: DictConfig) -> None:
                 cat_feats=cat_features, cat_maps=cat_maps,
                 targ_feats=target, targ_type='int',
                 wgt_feat=weight,
-                savename=to_absolute_path(f'{cfg.output_folder}/{cfg.test_name}')
+                savename=to_absolute_path(f'{output_path}/{cfg.test_name}')
                 )
 
 if __name__ == '__main__':
