@@ -1,6 +1,6 @@
-train_file: 'data/train.hdf5'
-test_file: 'data/test.hdf5'
-pipe_file: 'data/input_pipe.pkl'
+train_file: 'data/multi/train.hdf5'
+test_file: 'data/multi/test.hdf5'
+pipe_file: 'data/multi/input_pipe.pkl'
 
 cont_features:
   - pt_1
@@ -19,8 +19,9 @@ cat_features:
   - njets
 
 model_param:
-  objective: 'binary'
-  metric: ['auc', 'binary_error', 'binary_logloss']
+  objective: 'multiclass'
+  num_class: 3
+  metric: ['multi_logloss', 'multi_error']
   learning_rate: 0.01
   early_stopping: 10
   first_metric_only: True
