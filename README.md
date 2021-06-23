@@ -1,17 +1,28 @@
-# htt-ml-framework
+# ML framework for HTT analyses
 
+## Data preprocessing
 To run skimming of ROOT files into hdf5 adjust `configs/preprocess_cfg.yaml` and run:
 ```bash
-python preprocess_data.py # you can also pass here additional params/override existing ones, see hydra docs for details
+python preprocess_data.py # one can also pass here additional params/override existing ones, see hydra docs for details
 ```
 
-To track the model training `mlflow` project has been set up, see its description in `MLproject` file. There is currently only one entry point `main`, which simply runs `python train.py`. This by default uses the params from `configs/training_cfg.yaml` as parsed by `hydra`, so adjust them accordingly.  To train the model create an experiment (unless already done) and run it with `mlflow` as (`--no-conda` to avoid creating new conda environment):
+## Model training
+To track the model training [`mlflow`](https://mlflow.org/docs/latest/index.html) project has been set up, see its description in `MLproject` file. There is currently two entry points: _binary_ (binary classification problem) and _multi_ (multiclass classification problem), where each runs `python train.py` with necessary parameters from `configs/training_cfg.yaml` added/overriden. There is [`hydra`](https://hydra.cc/docs/intro) used under the hood to parse those parameters.  
+
+To train the model create an experiment (unless already done) and run it with `mlflow` specifying:
+*  a corresponding entry point (`-e multi`)
+*  name of the experiment for the run to be assigned to (`--experiment-name test`)
+*  `--no-conda` to avoid creating new conda environment
+*  mlflow params with their values (`-P num_iterations=5`, and one can also pass multiple ones) 
+*  project directory (`.` - current)
+
 ```bash
 mlflow experiments create -n test
-mlflow run -e main --experiment-name test --no-conda .
+mlflow run -e multi --experiment-name test -P num_iterations=5 --no-conda .
 ```
 
-Once done, UI interface to inspect the logged results of `mlflow` can be launched with (`-p` specifies the port id): 
+## Tracking results
+Once the training is done, UI interface to inspect the logged results of `mlflow` can be launched with (`-p` specifies the port id): 
 ```bash
 mlflow ui -p 5000
 ```
