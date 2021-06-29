@@ -3,18 +3,18 @@ conda-env: conda.yaml
 entry_points:
   multi:
     parameters:
-      train_file: {type: str, default: "data/multi/train.hdf5"}
-      test_file: {type: str, default: "data/multi/test.hdf5"}
-      pipe_file: {type: str, default: "data/multi/input_pipe.pkl"}
+      train_file: {type: str, default: "data/2018/multi/train.hdf5"}
+      test_file: {type: str, default: "data/2018/multi/test.hdf5"}
+      pipe_file: {type: str, default: "data/2018/multi/input_pipe.pkl"}
       num_iterations: {type: int, default: 10}
     command: "python train.py \
                               train_file={train_file} test_file={test_file} pipe_file={pipe_file} \
                               model_param.num_iterations={num_iterations}"
   binary:
     parameters:
-      train_file: {type: str, default: "data/ggH_ZTT/train.hdf5"}
-      test_file: {type: str, default: "data/ggH_ZTT/test.hdf5"}
-      pipe_file: {type: str, default: "data/ggH_ZTT/input_pipe.pkl"}
+      train_file: {type: str, default: "data/2018/ggH_ZTT/train.hdf5"}
+      test_file: {type: str, default: "data/2018/ggH_ZTT/test.hdf5"}
+      pipe_file: {type: str, default: "data/2018/ggH_ZTT/input_pipe.pkl"}
       num_iterations: {type: int, default: 10}
     command: "python train.py \
                               train_file={train_file} test_file={test_file} pipe_file={pipe_file} \

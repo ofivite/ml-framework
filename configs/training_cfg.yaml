@@ -22,7 +22,7 @@ model_param:
   objective: 'multiclass'
   num_class: 3
   metric: ['multi_logloss', 'multi_error']
-  learning_rate: 0.01
+  learning_rate: 0.1
   early_stopping: 10
   first_metric_only: True
   metric_freq: 10
@@ -36,3 +36,17 @@ model_param:
   verbosity: 1
   seed: 1357
   num_iterations: 20
+
+class_to_info:
+  0:
+    name: higgs
+    color: '194, 71, 92' # RGB format
+    alpha: 0.6 # color transparency
+  1:
+    name: taus
+    color: '90, 90, 90'
+    alpha: 0.7
+  2:
+    name: fakes
+    color: '65, 123, 159'
+    alpha: .9
