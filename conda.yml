@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
   - pytorch
+  - plotly
 dependencies:
   - python=3.9
   - pip
@@ -10,6 +11,7 @@ dependencies:
   - mlflow
   - matplotlib
   - seaborn
+  - plotly
   - numpy
   - numba
   - pandas
