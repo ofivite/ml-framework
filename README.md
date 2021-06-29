@@ -7,6 +7,8 @@ conda env create -f conda.yaml
 ```
 Oppositely to this manual installation, running `mlflow run` without `--no-conda` flag will create a conda environment based on `conda.yaml` cfg file by default.
 
+Note: for correct `plotly` rendering in JupyterLab, [check](https://plotly.com/python/troubleshooting/#jupyterlab-problems) that extensions are enabled in Extension Manager (located in the corresponding tab on the left panel of the JupyterLab window) and `jupyterlab-plotly` is displayed amongst them.   
+
 ## Data preprocessing
 To run skimming of ROOT files into hdf5 adjust `configs/preprocess_cfg.yaml` and run:
 ```bash
