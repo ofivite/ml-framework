@@ -45,14 +45,17 @@ def plot_class_score(df, class_id, class_to_info, how='density'):
         )
         return fig
     elif how=='stacked':
-        fig = px.histogram(df.query(f'pred_class == {class_id}'), x="pred_class_proba", color="true_class",
+        fig = px.histogram(df.query(f'pred_class == {class_id}'), x="pred_class_proba", y='gen_weight',
+                   color="true_class",
                    marginal="box", # or violin, or rug
-                   barmode='overlay',
+                   barmode='group',
+                   histfunc='sum',
                    nbins=50,
                    color_discrete_map={i: f'rgba({class_to_info[i].color}, {class_to_info[i].alpha})' for i in class_to_info},
                    log_y=True)
         fig.update_layout(
             title_text=f'{class_to_info[class_id].name} category',
+            barmode='stack',
             autosize=False,
             width=1000,
             height=500,
