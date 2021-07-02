@@ -73,17 +73,17 @@ def main(cfg: DictConfig) -> None:
 
     # feature names to be used in training
     train_features = cfg.cont_features + cfg.cat_features
-    weight_feature = 'gen_weight' # internal (hardcoded) column name in lumin
-    target_feature = 'gen_target' # internal (hardcoded) column name in lumin
+    weight_name = cfg.train_weight
+    target_name = 'gen_target' # internal target name defined inside of lumin
 
     # prepare train/test data
     train_fy = FoldYielder(to_absolute_path(cfg.train_file), input_pipe=to_absolute_path(cfg.pipe_file))
     train_df = train_fy.get_df(inc_inputs=True, deprocess=False)
-    train_data = lgb.Dataset(train_df[train_features], label=train_df[target_feature], weight=train_df[weight_feature])
+    train_data = lgb.Dataset(train_df[train_features], label=train_df[target_name], weight=train_df[weight_name])
     #
     test_fy = FoldYielder(to_absolute_path(cfg.test_file), input_pipe=to_absolute_path(cfg.pipe_file))
     test_df = test_fy.get_df(inc_inputs=True, deprocess=False)
-    validation_data = lgb.Dataset(test_df[train_features], label=test_df[target_feature], weight=test_df[weight_feature], reference=train_data)
+    validation_data = lgb.Dataset(test_df[train_features], label=test_df[target_name], weight=test_df[weight_name], reference=train_data)
 
     # check that class id match in data and in training cfg
     class_ids = {int(class_id) for class_id in cfg.class_to_info}
@@ -95,13 +95,13 @@ def main(cfg: DictConfig) -> None:
         y_proba_test = model.predict(test_df[train_features])
         if cfg.model_param.objective == 'binary':
             y_pred_test = y_proba_test > 0.5
-            loss = log_loss(test_df[target_feature], y_proba_test)
-            acc = accuracy_score(test_df[target_feature], y_pred_test)
+            loss = log_loss(test_df[target_name], y_proba_test)
+            acc = accuracy_score(test_df[target_name], y_pred_test)
             mlflow.log_metrics({"log_loss": loss, "accuracy": acc})
 
             fig, ax = plt.subplots()
-            plt.hist(y_proba_test[test_df[target_feature]==0], alpha=0.4, bins=30, density=True, label='bkgr')
-            plt.hist(y_proba_test[test_df[target_feature]==1], alpha=0.4, bins=30, density=True, label='sig')
+            plt.hist(y_proba_test[test_df[target_name]==0], alpha=0.4, bins=30, density=True, label='bkgr')
+            plt.hist(y_proba_test[test_df[target_name]==1], alpha=0.4, bins=30, density=True, label='sig')
             plt.legend()
             mlflow.log_figure(fig, "binary_score.png")
         if cfg.model_param.objective == 'multiclass':

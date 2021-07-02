@@ -32,14 +32,14 @@ def main(cfg: DictConfig) -> None:
 
     # combine all data samples into single pandas dataframe
     data_samples = {}
-    target = cfg.target_name
+    _target = 'target' # internal target name
     for process_name, process_cfg in cfg.process_to_cfg.items():
         print(f'loading {process_name}...')
         process_filename = fill_placeholders(process_cfg['filename'], {'{year}': cfg.year})
         process_path = f'{input_path}/{process_filename}'
         with uproot.open(process_path) as f:
             data_samples[process_name] = f[cfg.tree_name].arrays(cfg.branches, cut=process_cfg['cut'], library='pd')
-        data_samples[process_name][target] = process_cfg['class']
+        data_samples[process_name][_target] = process_cfg['class']
     data = pd.concat(data_samples, ignore_index=True)
     del(data_samples); gc.collect()
 
@@ -48,7 +48,7 @@ def main(cfg: DictConfig) -> None:
     data['njets'] = data.njets.clip(0, 5)
 
     # derive key for stratified split
-    data['strat_key'] = ids2unique(data[[target] + cat_features].values)
+    data['strat_key'] = ids2unique(data[[_target] + cat_features].values)
 
     # split into train and test samples
     train_df, test_df = train_test_split(data, train_size=cfg.train_size, stratify=data['strat_key'], random_state=1357)
@@ -59,22 +59,28 @@ def main(cfg: DictConfig) -> None:
     test_df[cont_features] = input_pipe.transform(test_df[cont_features])
     cat_maps, cat_szs = proc_cats(train_df, cat_features, test_df)
 
-    # derive weights accounting for imbalance in data
-    weight = cfg.weight_name
-    train_df[weight], test_df[weight] = 1, 1
-    for class_label in set(data[target]):
-        train_df.loc[train_df[target] == class_label, weight] *= (cfg.weight_multiplier/np.sum(train_df.loc[train_df[target] == class_label, weight]))
-        test_df.loc[test_df[target] == class_label, weight] *= (cfg.weight_multiplier/np.sum(test_df.loc[test_df[target] == class_label, weight]))
+    # training weights accounting for imbalance in data
+    train_df['w_class_imbalance'], test_df['w_class_imbalance'] = 1, 1
+    for class_label in set(data[_target]):
+        train_df.loc[train_df[_target] == class_label, 'w_class_imbalance'] = data.shape[0]/data.query(f'{_target}=={class_label}').shape[0]
+        test_df.loc[test_df[_target] == class_label, 'w_class_imbalance'] = data.shape[0]/data.query(f'{_target}=={class_label}').shape[0]
 
-    # check_val_set(train_df[train_features], val_df[train_features], test_df[train_features])
+    # training weights as used in CP in HTT analysis
+    train_df['class_weight'], test_df['class_weight'] = 1, 1 # these are derived per each class as: sum("weight") for whole dataset / sum("weight") for class
+    for class_label in set(data[_target]):
+        train_df.loc[train_df[_target] == class_label, 'class_weight'] = np.sum(data['weight'])/np.sum(data.loc[data[_target] == class_label, 'weight'])
+        test_df.loc[test_df[_target] == class_label, 'class_weight'] = np.sum(data['weight'])/np.sum(data.loc[data[_target] == class_label, 'weight'])
+    train_df['w_cp'] = abs(train_df['weight'])*train_df['class_weight']
+    test_df['w_cp'] = abs(test_df['weight'])*test_df['class_weight']
 
     # store into a hdf5 fold file
     df2foldfile(df=train_df,
                 n_folds=cfg.n_folds, strat_key='strat_key',
                 cont_feats=cont_features,
                 cat_feats=cat_features, cat_maps=cat_maps,
-                targ_feats=target, targ_type='int',
-                wgt_feat=weight,
+                targ_feats=_target, targ_type='int',
+                wgt_feat=None,
+                misc_feats=['w_class_imbalance', 'w_cp', 'class_weight', 'weight'],
                 savename=to_absolute_path(f'{output_path}/{cfg.train_name}')
                 )
 
@@ -82,8 +88,9 @@ def main(cfg: DictConfig) -> None:
                 n_folds=cfg.n_folds,
                 cont_feats=cont_features,
                 cat_feats=cat_features, cat_maps=cat_maps,
-                targ_feats=target, targ_type='int',
-                wgt_feat=weight,
+                targ_feats=_target, targ_type='int',
+                wgt_feat=None,
+                misc_feats=['w_class_imbalance', 'w_cp', 'class_weight', 'weight'],
                 savename=to_absolute_path(f'{output_path}/{cfg.test_name}')
                 )
 

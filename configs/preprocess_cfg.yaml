@@ -83,7 +83,7 @@ process_to_cfg:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 tree_name: TauCheck
-branches:
+branches: # to be fetched from input files
   - pt_1
   - pt_2
   - jpt_1
@@ -97,6 +97,7 @@ branches:
   - puppimt_1
   - pt_tt
   - puppimet
+  - weight
 
 cont_features:
   - pt_1
@@ -115,15 +116,11 @@ cont_features:
 cat_features:
   - njets
 
-weight_name: weight
-target_name: target
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 train_size: 0.8
 norm: True
 pca: False
-weight_multiplier: 1.0
 n_folds: 10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
