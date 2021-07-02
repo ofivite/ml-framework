@@ -18,7 +18,8 @@ cont_features:
 cat_features:
   - njets
 
-train_weight: 'w_cp'
+weight_name: 'w_cp'
+
 model_param:
   objective: 'multiclass'
   num_class: 3

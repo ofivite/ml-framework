@@ -27,7 +27,7 @@ sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 2.5})
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def plot_class_score(df, class_id, class_to_info, how='density'):
+def plot_class_score(df, class_id, class_to_info, how='density', weight=None):
     if how=='density':
         hist_data = [df.query(f'pred_class == {class_id} and true_class == {i}')['pred_class_proba'] for i in class_to_info]
         class_labels = [class_to_info[i].name for i in class_to_info]
@@ -45,7 +45,7 @@ def plot_class_score(df, class_id, class_to_info, how='density'):
         )
         return fig
     elif how=='stacked':
-        fig = px.histogram(df.query(f'pred_class == {class_id}'), x="pred_class_proba", y='gen_weight',
+        fig = px.histogram(df.query(f'pred_class == {class_id}'), x="pred_class_proba", y=weight,
                    color="true_class",
                    marginal="box", # or violin, or rug
                    barmode='group',
@@ -71,18 +71,24 @@ def main(cfg: DictConfig) -> None:
     # enable auto logging for mlflow
     mlflow.lightgbm.autolog()
 
-    # feature names to be used in training
-    train_features = cfg.cont_features + cfg.cat_features
-    weight_name = cfg.train_weight
+    # fetch feature/weight/target names
+    train_features = cfg.cont_features + cfg.cat_features # features to be used in training
+    weight_name = cfg.weight_name
     target_name = 'gen_target' # internal target name defined inside of lumin
 
     # prepare train/test data
     train_fy = FoldYielder(to_absolute_path(cfg.train_file), input_pipe=to_absolute_path(cfg.pipe_file))
     train_df = train_fy.get_df(inc_inputs=True, deprocess=False)
+    train_df['w_cp'] = train_fy.get_column('w_cp')
+    train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
+    train_df['plot_weight'] = train_fy.get_column('weight')
     train_data = lgb.Dataset(train_df[train_features], label=train_df[target_name], weight=train_df[weight_name])
     #
     test_fy = FoldYielder(to_absolute_path(cfg.test_file), input_pipe=to_absolute_path(cfg.pipe_file))
     test_df = test_fy.get_df(inc_inputs=True, deprocess=False)
+    test_df['w_cp'] = test_fy.get_column('w_cp')
+    test_df['w_class_imbalance'] = test_fy.get_column('w_class_imbalance')
+    test_df['plot_weight'] = test_fy.get_column('weight')
     validation_data = lgb.Dataset(test_df[train_features], label=test_df[target_name], weight=test_df[weight_name], reference=train_data)
 
     # check that class id match in data and in training cfg
@@ -108,11 +114,13 @@ def main(cfg: DictConfig) -> None:
             y_proba = model.predict(test_df[train_features])
             y_pred_class = np.argmax(y_proba, axis=1)
             y_pred_class_proba = np.max(y_proba, axis=1)
-            df_pred = pd.DataFrame({'pred_class_proba': y_pred_class_proba, 'pred_class': y_pred_class, 'true_class': test_df.gen_target})
+            df_pred = pd.DataFrame({'pred_class_proba': y_pred_class_proba, 'pred_class': y_pred_class,
+                                    'true_class': test_df.gen_target, 'plot_weight': test_df['plot_weight']
+                                    })
             for class_id in cfg.class_to_info:
                 class_name = cfg.class_to_info[class_id].name
                 fig_density = plot_class_score(df_pred, class_id, cfg.class_to_info, how='density')
-                fig_stacked = plot_class_score(df_pred, class_id, cfg.class_to_info, how='stacked')
+                fig_stacked = plot_class_score(df_pred, class_id, cfg.class_to_info, how='stacked', weight='plot_weight')
                 mlflow.log_figure(fig_density, f"plots/density/multiclass_score_{class_name}.html")
                 mlflow.log_figure(fig_stacked, f"plots/stacked/multiclass_score_{class_name}.html")
 
