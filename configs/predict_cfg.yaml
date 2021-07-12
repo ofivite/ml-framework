@@ -1,0 +1,17 @@
+# input
+year: 2018
+input_path: 'data/{year}'
+sample_names:
+    - DYJets
+misc_features: # will be added to output ROOT file along with prediction branches
+    - evt
+
+# model & pipe
+mlflow_experimentID: 1
+mlflow_runID: ae2c1b19bca644afa08c44d93742e575
+input_pipe: data/{year}/multi/input_pipe.pkl
+
+# output
+output_path: data/{year}/multi/pred
+output_filename_template: mt-NOMINAL_ntuple_{sample_name}_{year}_pred.root
+output_tree_name: TauCheck
