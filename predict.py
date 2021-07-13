@@ -14,37 +14,6 @@ from utils.processing import fill_placeholders
 
 @hydra.main(config_path="configs", config_name="predict_cfg")
 def main(cfg: DictConfig) -> None:
-
-    # file_name = fill_placeholders(cfg.file_name_template, {'{sample_name}': cfg.sample_name, '{year}': cfg.year})
-    # f = uproot.open(f'{input_path}/{file_name}')
-    # t = f[cfg.tree_name]
-    # data = t.arrays(train_features + misc_features, library='pd')
-    # f.close()
-    # del(t)
-    #
-    # # some preprocessing
-    # data.replace([np.inf, -np.inf], np.nan, inplace=True) # lumin handles nans automatically
-    # data['njets'] = data.njets.clip(0, 5)
-    #
-    # # apply normalisation
-    # with open(cfg.input_pipe, 'rb') as fin:
-    #     input_pipe = pickle.load(fin)
-    # data[cont_features] = input_pipe.transform(data[cont_features])
-    # cat_maps, cat_szs = proc_cats(data, cat_features)
-    #
-    # # dummy target to be able to save into the fold
-    # data[_target] = -1
-    #
-    # # store into a hdf5 fold file
-    # df2foldfile(df=data,
-    #             n_folds=10,
-    #             cont_feats=cont_features,
-    #             cat_feats=cat_features, cat_maps=cat_maps,
-    #             targ_feats=_target, targ_type=int,
-    #             misc_feats=misc_features,
-    #             savename=f'data/2018/multi/pred/{sample_name}'
-    #             )
-
     # fill placeholders in the cfg parameters
     input_path = to_absolute_path(fill_placeholders(cfg.input_path, {'{year}': cfg.year}))
     output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
@@ -76,10 +45,6 @@ def main(cfg: DictConfig) -> None:
         y_proba = model.predict(df[train_features])
         y_pred_class = np.argmax(y_proba, axis=1).astype(np.int32)
         y_pred_class_proba = np.max(y_proba, axis=1).astype(np.float32)
-#         if 'evt' not in df:
-#             raise Exception('"evt" (or other unique ID variable) should be present in the input file')
-#         else:
-#             df['evt'] = df['evt'].to_numpy().astype(np.int32)
 
         # store predictions in RDataFrame and snapshot it into output ROOT file
         output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
