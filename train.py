@@ -15,10 +15,11 @@ from lumin.data_processing.pre_proc import fit_input_pipe, proc_cats
 from lumin.data_processing.file_proc import df2foldfile
 from lumin.nn.data.fold_yielder import FoldYielder
 
-# import click
 import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
+
+from utils.plotting import plot_class_score
 
 @hydra.main(config_path="configs", config_name="train_cfg")
 def main(cfg: DictConfig) -> None:
