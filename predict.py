@@ -48,6 +48,7 @@ def main(cfg: DictConfig) -> None:
     #             savename=f'data/2018/multi/pred/{sample_name}'
     #             )
 
+    # fill placeholders in the cfg parameters
     input_path = to_absolute_path(fill_placeholders(cfg.input_path, {'{year}': cfg.year}))
     output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
     model_path = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/artifacts/model')
@@ -61,11 +62,14 @@ def main(cfg: DictConfig) -> None:
     for s in model_cfg['signature']['inputs'].split('{')[1:]:
         train_features.append(s.split("\"")[3])
 
+    # loop over input fold files
     for sample_name in cfg.sample_names:
+        input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+
         # extract DataFrame from fold file
-        fy = FoldYielder(f'{input_path}/{sample_name}.hdf5', input_pipe=input_pipe)
+        fy = FoldYielder(f'{input_path}/{input_filename}', input_pipe=input_pipe)
         df = fy.get_df(inc_inputs=True, deprocess=False)
-        for f in misc_features:
+        for f in misc_features: # add misc features
             df[f] = fy.get_column(f)
 
         # load mlflow logged model
@@ -80,7 +84,7 @@ def main(cfg: DictConfig) -> None:
 #         else:
 #             df['evt'] = df['evt'].to_numpy().astype(np.int32)
 
-        # write predictions into RDataFrame and snapshot it into output ROOT file
+        # store predictions in RDataFrame and snapshot it into output ROOT file
         output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
         R_df = R.RDF.MakeNumpyDataFrame({'pred_class': y_pred_class,
                                          'pred_class_proba': y_pred_class_proba,

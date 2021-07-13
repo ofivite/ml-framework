@@ -1,17 +1,29 @@
-# input
+# input path & info
 year: 2018
 input_path: 'data/{year}'
+input_filename_template: '{sample_name}.hdf5'
 sample_names:
+    - Diboson
     - DYJets
+    - EmbeddedMuTau
+    - EWKZ
+    - GluGluHToUncorrTauTau
+    - HToWW
+    - SingleMuon
+    - TTbar
+    - VBFHToUncorrTauTau
+    - WHToUncorrTauTau
+    - WJets
+    - ZHToUncorrTauTau
 misc_features: # will be added to output ROOT file along with prediction branches
     - evt
 
-# model & pipe
+# model & pipe to make predictions
 mlflow_experimentID: 1
 mlflow_runID: ae2c1b19bca644afa08c44d93742e575
-input_pipe: data/{year}/multi/input_pipe.pkl
+input_pipe: 'data/{year}/multi/input_pipe.pkl'
 
-# output
-output_path: data/{year}/multi/pred
-output_filename_template: mt-NOMINAL_ntuple_{sample_name}_{year}_pred.root
+# output path & names
+output_path: 'data/{year}/multi/pred'
+output_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_{year}_pred.root'
 output_tree_name: TauCheck
