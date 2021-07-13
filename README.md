@@ -1,13 +1,28 @@
 # ML framework for HTT analyses
 
 ## Environment setup
-It is recommended to run the code from within a dedicated conda environment, which can be set up from a `conda.yaml` file. Firstly, download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) following [these instructions](https://conda.io/projects/conda/en/latest/user-guide/install/index.html), and after that install the conda environment with:
+It is recommended to run the code/install necessary packages from within a dedicated conda environment, which can be set up from a `conda.yaml` file. Firstly, download and install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) following [these instructions](https://conda.io/projects/conda/en/latest/user-guide/install/index.html), and after that install the conda environment with:
 ```bash
 conda env create -f conda.yaml
 ```
-Oppositely to this manual installation, running `mlflow run` without `--no-conda` flag will create a conda environment based on `conda.yaml` cfg file by default.
 
-Note: for correct `plotly` rendering in JupyterLab, [check](https://plotly.com/python/troubleshooting/#jupyterlab-problems) that extensions are enabled in Extension Manager (located in the corresponding tab on the left panel of the JupyterLab window) and `jupyterlab-plotly` is displayed amongst them.   
+Once the conda environment is created, it can be activated/deactivated with:
+```bash
+ENV_NAME=htt-ml
+conda activate $ENV_NAME
+# conda deactivate
+```
+
+At this point, one might want to register this environment in Jupyter as a kernel. To do that, execute inside of env the following command:
+```bash
+ENV_NAME=htt-ml
+ipython kernel install --user --name=$ENV_NAME
+```
+The newly created kernel can now be activated in the Jupyter selection menu (top-right corner of Jupyter window)
+
+_Note:_ Oppositely to this manual installation, running `mlflow run` without `--no-conda` flag will create a conda environment based on `conda.yaml` cfg file by default.
+
+_Note:_ For correct `plotly` rendering in JupyterLab, [check](https://plotly.com/python/troubleshooting/#jupyterlab-problems) that extensions are enabled in Extension Manager (located in the corresponding tab on the left panel of the JupyterLab window) and `jupyterlab-plotly` is displayed amongst them.   
 
 ## Data preprocessing
 To run skimming of ROOT files into hdf5 adjust `configs/preprocess_cfg.yaml` and run:
