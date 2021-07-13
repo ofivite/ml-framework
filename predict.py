@@ -10,10 +10,7 @@ from lumin.nn.data.fold_yielder import FoldYielder
 import numpy as np
 from mlflow.pyfunc import load_model
 
-def fill_placeholders(string, placeholder_to_value):
-    for placeholder, value in placeholder_to_value.items():
-        string = string.replace(placeholder, str(value))
-    return string
+from utils.processing import fill_placeholders
 
 @hydra.main(config_path="configs", config_name="predict_cfg")
 def main(cfg: DictConfig) -> None:
