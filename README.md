@@ -16,7 +16,7 @@ python preprocess_data.py # one can also pass here additional params/override ex
 ```
 
 ## Model training
-To track the model training [`mlflow`](https://mlflow.org/docs/latest/index.html) project has been set up, see its description in `MLproject` file. There is currently two entry points: _binary_ (binary classification problem) and _multi_ (multiclass classification problem), where each runs `python train.py` with necessary parameters from `configs/training_cfg.yaml` added/overriden. There is [`hydra`](https://hydra.cc/docs/intro) used under the hood to parse those parameters.  
+To track the model training [`mlflow`](https://mlflow.org/docs/latest/index.html) project has been set up, see its description in `MLproject` file. There is currently two entry points: _binary_ (binary classification problem) and _multi_ (multiclass classification problem), where each runs `python train.py` with necessary parameters from `configs/training.yaml` added/overriden. There is [`hydra`](https://hydra.cc/docs/intro) used under the hood to parse those parameters.  
 
 To train the model create an experiment (unless already done) and run it with `mlflow` specifying:
 *  a corresponding entry point (`-e multi`)

@@ -20,7 +20,7 @@ import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
 
-@hydra.main(config_path="configs", config_name="training_cfg")
+@hydra.main(config_path="configs", config_name="train_cfg")
 def main(cfg: DictConfig) -> None:
     # enable auto logging for mlflow
     mlflow.lightgbm.autolog()
