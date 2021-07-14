@@ -83,38 +83,23 @@ process_to_cfg:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 tree_name: TauCheck
-branches: # to be fetched from input files
+cont_features: # will be stored in the output file and used for training
   - pt_1
   - pt_2
   - jpt_1
   - jpt_2
   - dijetpt
   - jdeta
-  - njets
   - m_sv
   - mjj
   - m_vis
   - puppimt_1
   - pt_tt
   - puppimet
+cat_features: # will be stored in the output file and used for training
+  - njets
+misc_features: # miscellaneous features for intermediate computations, not necessarily stored (see preprocess.py)
   - weight
-
-cont_features:
-  - pt_1
-  - pt_2
-  - jpt_1
-  - jpt_2
-  - dijetpt
-  - jdeta
-  - m_sv
-  - mjj
-  - m_vis
-  - puppimt_1
-  - pt_tt
-  - puppimet
-
-cat_features:
-  - njets
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -22,8 +22,10 @@ from utils.processing import fill_placeholders
 
 @hydra.main(config_path="configs", config_name="preprocess_cfg")
 def main(cfg: DictConfig) -> None:
-    cat_features = OmegaConf.to_object(cfg.cat_features)
     cont_features = OmegaConf.to_object(cfg.cont_features)
+    cat_features = OmegaConf.to_object(cfg.cat_features)
+    misc_features = OmegaConf.to_object(cfg.misc_features)
+    input_branches = cont_features + cat_features + misc_features
     input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
     output_path = fill_placeholders(cfg.output_path, {'{year}': cfg.year})
 
@@ -35,7 +37,7 @@ def main(cfg: DictConfig) -> None:
         process_filename = fill_placeholders(process_cfg['filename'], {'{year}': cfg.year})
         process_path = f'{input_path}/{process_filename}'
         with uproot.open(process_path) as f:
-            data_samples[process_name] = f[cfg.tree_name].arrays(cfg.branches, cut=process_cfg['cut'], library='pd')
+            data_samples[process_name] = f[cfg.tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
         data_samples[process_name][_target] = process_cfg['class']
     data = pd.concat(data_samples, ignore_index=True)
     del(data_samples); gc.collect()
