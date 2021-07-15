@@ -32,13 +32,15 @@ def main(cfg: DictConfig) -> None:
     # combine all data samples into single pandas dataframe
     data_samples = {}
     _target = 'target' # internal target name
-    for process_name, process_cfg in cfg.process_to_cfg.items():
-        print(f'loading {process_name}...')
-        process_filename = fill_placeholders(process_cfg['filename'], {'{year}': cfg.year})
-        process_path = f'{input_path}/{process_filename}'
-        with uproot.open(process_path) as f:
-            data_samples[process_name] = f[cfg.input_tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
-        data_samples[process_name][_target] = process_cfg['class']
+    for sample_name, processes in cfg.input_samples.items():
+        print(f'opening {sample_name}...')
+        input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+        with uproot.open(f'{input_path}/{input_filename}') as f:
+            for process_name, process_cfg in processes.items():
+                print(f'    loading {process_name}...')
+                data_samples[process_name] = f[cfg.input_tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
+                data_samples[process_name][_target] = process_cfg['class']
+                data_samples[process_name]['process'] = process_name
     data = pd.concat(data_samples, ignore_index=True)
     del(data_samples); gc.collect()
 
