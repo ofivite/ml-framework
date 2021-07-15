@@ -1,0 +1,43 @@
+for_training: False
+year: 2018
+input_path: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS
+input_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_{year}.root' # assume the same pattern for all input sample files
+input_tree_name: TauCheck
+input_samples:
+    - Diboson
+    - DYJets
+    - EmbeddedMuTau
+    - EWKZ
+    - GluGluHToUncorrTauTau
+    - HToWW
+    - SingleMuon
+    - TTbar
+    - VBFHToUncorrTauTau
+    - WHToUncorrTauTau
+    - WJets
+    - ZHToUncorrTauTau
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+input_pipe_file: 'data/2018/multi/dev/input_pipe.pkl'
+cont_features: # will be stored in the output file and used for training
+  - pt_1
+  - pt_2
+  - jpt_1
+  - jpt_2
+  - dijetpt
+  - jdeta
+  - m_sv
+  - mjj
+  - m_vis
+  - puppimt_1
+  - pt_tt
+  - puppimet
+cat_features: # will be stored in the output file and used for training
+  - njets
+misc_features: # miscellaneous features for intermediate computations, not necessarily stored (see preprocess.py)
+  - weight
+
+output_path:  data/{year}/multi/dev/skims
+output_filename_template: '{sample_name}_{year}.root'
+n_folds: 10
