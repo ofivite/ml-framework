@@ -37,7 +37,7 @@ def main(cfg: DictConfig) -> None:
         process_filename = fill_placeholders(process_cfg['filename'], {'{year}': cfg.year})
         process_path = f'{input_path}/{process_filename}'
         with uproot.open(process_path) as f:
-            data_samples[process_name] = f[cfg.tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
+            data_samples[process_name] = f[cfg.input_tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
         data_samples[process_name][_target] = process_cfg['class']
     data = pd.concat(data_samples, ignore_index=True)
     del(data_samples); gc.collect()

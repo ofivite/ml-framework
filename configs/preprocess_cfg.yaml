@@ -82,7 +82,7 @@ process_to_cfg:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-tree_name: TauCheck
+input_tree_name: TauCheck
 cont_features: # will be stored in the output file and used for training
   - pt_1
   - pt_2
