@@ -86,7 +86,7 @@ def main(cfg: DictConfig) -> None:
                 )
 
     df2foldfile(df=test_df,
-                n_folds=cfg.n_folds,
+                n_folds=cfg.n_folds, strat_key='strat_key',
                 cont_feats=cont_features,
                 cat_feats=cat_features, cat_maps=cat_maps,
                 targ_feats=_target, targ_type='int',
