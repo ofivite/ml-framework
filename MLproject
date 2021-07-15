@@ -5,21 +5,21 @@ entry_points:
     parameters:
       train_file: {type: str, default: "data/2018/multi/train.hdf5"}
       test_file: {type: str, default: "data/2018/multi/test.hdf5"}
-      pipe_file: {type: str, default: "data/2018/multi/input_pipe.pkl"}
+      input_pipe_file: {type: str, default: "data/2018/multi/input_pipe.pkl"}
       num_iterations: {type: int, default: 10}
       weight_name: {type: int, default: "w_cp"}
     command: "python train.py \
-                              train_file={train_file} test_file={test_file} pipe_file={pipe_file} \
+                              train_file={train_file} test_file={test_file} input_pipe_file={input_pipe_file} \
                               model_param.num_iterations={num_iterations} \
                               weight_name={weight_name}"
   binary:
     parameters:
       train_file: {type: str, default: "data/2018/ggH_ZTT/train.hdf5"}
       test_file: {type: str, default: "data/2018/ggH_ZTT/test.hdf5"}
-      pipe_file: {type: str, default: "data/2018/ggH_ZTT/input_pipe.pkl"}
+      input_pipe_file: {type: str, default: "data/2018/ggH_ZTT/input_pipe.pkl"}
       num_iterations: {type: int, default: 10}
     command: "python train.py \
-                              train_file={train_file} test_file={test_file} pipe_file={pipe_file} \
+                              train_file={train_file} test_file={test_file} input_pipe_file={input_pipe_file} \
                               model_param.objective=binary \
                               ~model_param.num_class \
                               model_param.metric=[auc,binary_error,binary_logloss] \

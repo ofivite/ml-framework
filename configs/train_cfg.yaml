@@ -1,6 +1,6 @@
 train_file: 'data/2018/multi/train.hdf5'
 test_file: 'data/2018/multi/test.hdf5'
-pipe_file: 'data/2018/multi/input_pipe.pkl'
+input_pipe_file: 'data/2018/multi/input_pipe.pkl'
 
 cont_features:
   - pt_1
