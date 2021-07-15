@@ -1,3 +1,4 @@
+for_training: True
 year: 2018
 input_path: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS
 input_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_{year}.root' # assume the same pattern for all input sample files
@@ -5,9 +6,9 @@ input_tree_name: TauCheck
 input_samples:
   # -------------
   GluGluHToUncorrTauTau: # name of the data sample
-    ggH: # name of the process within the sample to be extracted
-      cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5)' # selection cut to be applied
-      class: 0 # class ID which is assigned to this process
+      ggH: # name of the process within the sample to be extracted
+        cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5)' # selection cut to be applied
+        class: 0 # class ID which is assigned to this process
   # -------------
   VBFHToUncorrTauTau:
     VBF:
@@ -48,15 +49,12 @@ input_samples:
   # -------------
   EWKZ:
     EWKZT:
-      filename: mt-NOMINAL_ntuple_EWKZ_{year}.root
       cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_1==4) & (gen_match_2==5)'
       class: 1
     EWKZL:
-      filename: mt-NOMINAL_ntuple_EWKZ_{year}.root
       cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2!=6) & ((gen_match_1!=4) | (gen_match_2!=5))'
       class: 2
     EWKZJ:
-      filename: mt-NOMINAL_ntuple_EWKZ_{year}.root
       cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5) & (gen_match_2 == 6)'
       class: 2
   # -------------
@@ -73,13 +71,11 @@ input_samples:
   # -------------
   WJets:
     WJets:
-      filename: mt-NOMINAL_ntuple_WJets_{year}.root
       cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os>0.5)'
       class: 2
   # -------------
   SingleMuon:
     QCD:
-      filename: mt-NOMINAL_ntuple_SingleMuon_{year}.root
       cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os<0.5)'
       class: 2
 
@@ -103,16 +99,12 @@ cat_features: # will be stored in the output file and used for training
 misc_features: # miscellaneous features for intermediate computations, not necessarily stored (see preprocess.py)
   - weight
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 train_size: 0.8
 norm: True
 pca: False
-n_folds: 10
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-output_path: data/{year}/multi
+output_path: data/{year}/multi/skims/train
 train_name: 'train'
 test_name: 'test'
-pipe_name: 'input_pipe'
+pipe_name: 'input_pipe' # filename for saving
+n_folds: 10
