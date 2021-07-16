@@ -48,13 +48,14 @@ mlflow run -e multi --experiment-name test -P num_iterations=5 --no-conda .
 ## Tracking results
 Once the training is done, UI interface to inspect the logged results of `mlflow` can be launched with (`-p` specifies the port id):
 ```bash
-mlflow ui -p 5000
+PORT_ID=5000
+mlflow ui -p ${PORT_ID}
 ```
 
-In case of running on a remote machine and not being able to open a browser (as a GUI) there, one can listen to a remote server via ssh and interact with it on a local machine (e.g. laptop). The commands below (fill in {} the corresponding values) will make an ssh tunnel and forward remote port to a local one:
+In case of running on a remote machine and not being able to open a browser (as a GUI) there, one can listen to a remote server via ssh and interact with it on a local machine (e.g. personal laptop). The commands below (fill in {...} with the corresponding values) will make an ssh tunnel and forward remote port to a local one:
 ```bash
 SERVER=${USERNAME}@naf-cms${MACHINE_ID}.desy.de
-ssh -N -f -L localhost:${LOCAL_PORT}:localhost:${REMOTE_PORT} $SERVER
+ssh -N -f -L localhost:${LOCAL_PORT_ID}:localhost:${REMOTE_PORT_ID} ${SERVER}
 ```
 
 Then one can access `mlflow ui` locally by going to http://localhost:${LOCAL_PORT} in a browser.
