@@ -19,7 +19,7 @@ input_samples:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-input_pipe_file: 'data/2018/multi/dev/skims/input_pipe.pkl' # relative path
+input_pipe_file: 'data/2018/multi/skims/input_pipe.pkl' # relative path
 cont_features: # will be stored in the output file and used for training
   - pt_1
   - pt_2
@@ -40,6 +40,6 @@ misc_features: # miscellaneous features for intermediate computations, not neces
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-output_path:  data/{year}/multi/dev/skims # relative path
+output_path:  data/{year}/multi/skims # relative path
 output_filename_template: '{sample_name}' # {sample_name} here will be filled with names from "input_samples" above
 n_folds: 10 # will split output sample into these number of folds before saving to hdf5 file

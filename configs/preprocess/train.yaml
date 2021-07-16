@@ -97,7 +97,7 @@ pca: False
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-output_path: data/{year}/multi/dev/skims # relative path
+output_path: data/{year}/multi/skims # relative path
 output_filename_template: '{sample_name}'
 output_samples:
   - train
