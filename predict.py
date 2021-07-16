@@ -37,7 +37,7 @@ def main(cfg: DictConfig) -> None:
 
         # extract DataFrame from fold file
         fy = FoldYielder(f'{input_path}/{input_filename}', input_pipe=input_pipe)
-        df = fy.get_df(inc_inputs=True, deprocess=False, verbose=False)
+        df = fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
         for f in misc_features: # add misc features
             df[f] = fy.get_column(f)
 

@@ -33,14 +33,14 @@ def main(cfg: DictConfig) -> None:
 
     # prepare train/test data
     train_fy = FoldYielder(to_absolute_path(cfg.train_file), input_pipe=to_absolute_path(cfg.input_pipe_file))
-    train_df = train_fy.get_df(inc_inputs=True, deprocess=False)
+    train_df = train_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
     train_df['w_cp'] = train_fy.get_column('w_cp')
     train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
     train_df['plot_weight'] = train_fy.get_column('weight')
     train_data = lgb.Dataset(train_df[train_features], label=train_df[target_name], weight=train_df[weight_name])
     #
     test_fy = FoldYielder(to_absolute_path(cfg.test_file), input_pipe=to_absolute_path(cfg.input_pipe_file))
-    test_df = test_fy.get_df(inc_inputs=True, deprocess=False)
+    test_df = test_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
     test_df['w_cp'] = test_fy.get_column('w_cp')
     test_df['w_class_imbalance'] = test_fy.get_column('w_class_imbalance')
     test_df['plot_weight'] = test_fy.get_column('weight')
