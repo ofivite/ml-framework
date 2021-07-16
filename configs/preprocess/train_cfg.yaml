@@ -89,9 +89,13 @@ cat_features: # will be stored in the output file and used for training
 misc_features: # miscellaneous features for intermediate computations, not necessarily stored (see preprocess.py)
   - weight
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 train_size: 0.8
 norm: True
 pca: False
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 output_path: data/{year}/multi/dev/skims # relative path
 output_filename_template: '{sample_name}.hdf5'
