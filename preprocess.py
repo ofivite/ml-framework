@@ -29,15 +29,21 @@ def main(cfg: DictConfig) -> None:
     input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
     output_path = fill_placeholders(cfg.output_path, {'{year}': cfg.year})
 
-    # combine all data samples into single pandas dataframe
+    # combine all input data nodes into a single pandas dataframe
     data_samples = []
     _target = 'target' # internal target name
-    for sample_name in cfg.input_samples:
-        print(f'opening {sample_name}...')
+    for sample in cfg.input_samples:
+        if cfg.for_training:
+            assert type(sample)==dict and len(sample)==1 # for training, sample is a dictionary with 1 element, see the cfg file
+            sample_name = list(sample.keys())[0]
+        else:
+            assert type(sample)==str
+            sample_name = sample
         input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+        print(f'opening {sample_name}...')
         with uproot.open(f'{input_path}/{input_filename}') as f:
             if cfg.for_training:
-                processes = cfg.input_samples[sample_name]
+                processes = list(sample.values())[0]
                 for process_name, process_cfg in processes.items():
                     print(f'    loading {process_name}...')
                     data_sample = f[cfg.input_tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
@@ -59,17 +65,23 @@ def main(cfg: DictConfig) -> None:
     # derive key for stratified split
     data['strat_key'] = ids2unique(data[[_target] + cat_features].values)
 
+    # split data into output nodes: either train+test (for training) or sample_name based splitting (for prediction)
     if cfg.for_training:
-        # train: output_samples[0], test: output_samples[1]
+        # output_samples[0] -> train, output_samples[1] -> test
         output_samples = train_test_split(data, train_size=cfg.train_size, stratify=data['strat_key'], random_state=1357)
-        output_sample_names = [cfg.train_name, cfg.test_name]
+        output_sample_names = cfg.output_samples
+        assert len(output_sample_names)==len(output_samples)
         input_pipe = fit_input_pipe(output_samples[0], cont_features, to_absolute_path(f'{output_path}/{cfg.pipe_name}'), norm_in=cfg.norm, pca=cfg.pca)
         cat_maps, cat_szs = proc_cats(output_samples[0], cat_features, output_samples[1])
     else:
-        output_sample_names, output_samples = data.groupby('group_name') # will name output files according to the process name
-        input_pipe = ...
+        output_sample_names, output_samples = data.groupby('group_name')
+        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
+        with open(cfg.input_pipe_file, 'rb') as f:
+            input_pipe = pickle.load(f)
 
+    # loop over output nodes and store each into a fold file
     for output_sample, output_sample_name in zip(output_samples, output_sample_names):
+        # weights section
         if cfg.for_training:
             # add training weights accounting for imbalance in data
             output_sample['w_class_imbalance'] = 1
@@ -81,6 +93,9 @@ def main(cfg: DictConfig) -> None:
             for class_label in set(data[_target]):
                 output_sample.loc[output_sample[_target] == class_label, 'class_weight'] = np.sum(data['weight'])/np.sum(data.loc[data[_target] == class_label, 'weight'])
             output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
+            weight_features = ['w_class_imbalance', 'w_cp', 'class_weight', 'weight']
+        else:
+            weight_features = None
 
         # apply normalisation
         output_sample[cont_features] = input_pipe.transform(output_sample[cont_features])
@@ -92,7 +107,7 @@ def main(cfg: DictConfig) -> None:
                     cat_feats=cat_features, cat_maps=cat_maps,
                     targ_feats=_target, targ_type='int',
                     wgt_feat=None,
-                    misc_feats=['w_class_imbalance', 'w_cp', 'class_weight', 'weight'],
+                    misc_feats=weight_features,
                     savename=to_absolute_path(f'{output_path}/{output_sample_name}')
                     )
 

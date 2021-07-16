@@ -39,5 +39,5 @@ misc_features: # miscellaneous features for intermediate computations, not neces
   - weight
 
 output_path:  data/{year}/multi/dev/skims
-output_filename_template: '{sample_name}_{year}.root'
-n_folds: 10
+output_filename_template: '{sample_name}.hdf5' # {sample_name} here will be filled with names from "input_samples" above 
+n_folds: 10 # will split output sample into these number of folds before saving to hdf5 file
