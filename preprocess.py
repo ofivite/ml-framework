@@ -62,18 +62,19 @@ def main(cfg: DictConfig) -> None:
     data.replace([np.inf, -np.inf], np.nan, inplace=True) # lumin handles nans automatically
     data['njets'] = data.njets.clip(0, 5)
 
-    # derive key for stratified split
-    data['strat_key'] = ids2unique(data[[_target] + cat_features].values)
-
     # split data into output nodes: either train+test (for training) or sample_name based splitting (for prediction)
     if cfg.for_training:
+        # derive key for stratified split
+        strat_key = 'strat_key'
+        data[strat_key] = ids2unique(data[[_target] + cat_features].values);
         # output_samples[0] -> train, output_samples[1] -> test
-        output_samples = train_test_split(data, train_size=cfg.train_size, stratify=data['strat_key'], random_state=1357)
+        output_samples = train_test_split(data, train_size=cfg.train_size, stratify=data[strat_key], random_state=1357)
         output_sample_names = cfg.output_samples
         assert len(output_sample_names)==len(output_samples)
         input_pipe = fit_input_pipe(output_samples[0], cont_features, to_absolute_path(f'{output_path}/{cfg.pipe_name}'), norm_in=cfg.norm, pca=cfg.pca)
         cat_maps, cat_szs = proc_cats(output_samples[0], cat_features, output_samples[1])
     else:
+        strat_key = None # no stratification for prediction
         output_sample_names, output_samples = data.groupby('group_name')
         output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
         with open(cfg.input_pipe_file, 'rb') as f:
@@ -102,7 +103,7 @@ def main(cfg: DictConfig) -> None:
 
         # store into a hdf5 fold file
         df2foldfile(df=output_sample,
-                    n_folds=cfg.n_folds, strat_key='strat_key',
+                    n_folds=cfg.n_folds, strat_key=strat_key,
                     cont_feats=cont_features,
                     cat_feats=cat_features, cat_maps=cat_maps,
                     targ_feats=_target, targ_type='int',
