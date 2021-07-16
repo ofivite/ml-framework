@@ -77,7 +77,7 @@ def main(cfg: DictConfig) -> None:
         strat_key = None # no stratification for prediction
         output_samples = data.groupby('group_name')
         output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_samples.groups.keys()]
-        with open(cfg.input_pipe_file, 'rb') as f:
+        with open(to_absolute_path(cfg.input_pipe_file), 'rb') as f:
             input_pipe = pickle.load(f)
 
     # loop over output nodes and store each into a fold file
