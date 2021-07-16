@@ -1,6 +1,6 @@
 # input path & info
 year: 2018
-input_path: 'data/{year}'
+input_path: 'data/{year}/multi/skims'
 input_filename_template: '{sample_name}.hdf5'
 sample_names:
     - Diboson
@@ -21,7 +21,7 @@ misc_features: # will be added to output ROOT file along with prediction branche
 # model & pipe to make predictions
 mlflow_experimentID: 1
 mlflow_runID: ae2c1b19bca644afa08c44d93742e575
-input_pipe: 'data/{year}/multi/input_pipe.pkl'
+input_pipe: 'data/{year}/multi/skims/input_pipe.pkl' # the one used for skimming prediction data sets
 
 # output path & names
 output_path: 'data/{year}/multi/pred'
