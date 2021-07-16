@@ -1,4 +1,5 @@
 import yaml
+import gc
 import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
@@ -30,11 +31,13 @@ def main(cfg: DictConfig) -> None:
 
     # loop over input fold files
     for sample_name in cfg.sample_names:
+        print(f'--> {sample_name}')
+        print(f"        loading ...")
         input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
 
         # extract DataFrame from fold file
         fy = FoldYielder(f'{input_path}/{input_filename}', input_pipe=input_pipe)
-        df = fy.get_df(inc_inputs=True, deprocess=False)
+        df = fy.get_df(inc_inputs=True, deprocess=False, verbose=False)
         for f in misc_features: # add misc features
             df[f] = fy.get_column(f)
 
@@ -42,17 +45,19 @@ def main(cfg: DictConfig) -> None:
         model = load_model(model_path)
 
         # make predictions
+        print(f"        predicting ...")
         y_proba = model.predict(df[train_features])
         y_pred_class = np.argmax(y_proba, axis=1).astype(np.int32)
         y_pred_class_proba = np.max(y_proba, axis=1).astype(np.float32)
 
         # store predictions in RDataFrame and snapshot it into output ROOT file
+        print(f"        storing to output file ...")
         output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
         R_df = R.RDF.MakeNumpyDataFrame({'pred_class': y_pred_class,
                                          'pred_class_proba': y_pred_class_proba,
                                           **{misc_feature: df[misc_feature].to_numpy() for misc_feature in misc_features}
                                          })
         R_df.Snapshot(cfg.output_tree_name, f'{output_path}/{output_filename}')
-
+        del(df, R_df); gc.collect()
 if __name__ == '__main__':
     main()
