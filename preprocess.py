@@ -75,8 +75,9 @@ def main(cfg: DictConfig) -> None:
         cat_maps, cat_szs = proc_cats(output_samples[0], cat_features, output_samples[1])
     else:
         strat_key = None # no stratification for prediction
-        output_samples = data.groupby('group_name')
-        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_samples.groups.keys()]
+        output_samples = [group for _, group in data.groupby('group_name')]
+        output_sample_names = data.groupby('group_name').groups.keys()
+        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
         with open(to_absolute_path(cfg.input_pipe_file), 'rb') as f:
             input_pipe = pickle.load(f)
 
