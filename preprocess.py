@@ -67,7 +67,7 @@ def main(cfg: DictConfig) -> None:
         # derive key for stratified split
         strat_key = 'strat_key'
         data[strat_key] = ids2unique(data[[_target] + cat_features].values);
-        # output_samples[0] -> train, output_samples[1] -> test
+        # split into output_samples[0] -> train, output_samples[1] -> test
         output_samples = train_test_split(data, train_size=cfg.train_size, stratify=data[strat_key], random_state=1357)
         output_sample_names = cfg.output_samples
         assert len(output_sample_names)==len(output_samples)
@@ -75,13 +75,13 @@ def main(cfg: DictConfig) -> None:
         cat_maps, cat_szs = proc_cats(output_samples[0], cat_features, output_samples[1])
     else:
         strat_key = None # no stratification for prediction
-        output_sample_names, output_samples = data.groupby('group_name')
-        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
+        output_samples = data.groupby('group_name')
+        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_samples.groups.keys()]
         with open(cfg.input_pipe_file, 'rb') as f:
             input_pipe = pickle.load(f)
 
     # loop over output nodes and store each into a fold file
-    for output_sample, output_sample_name in zip(output_samples, output_sample_names):
+    for output_sample_name, output_sample in zip(output_sample_names, output_samples):
         # weights section
         if cfg.for_training:
             # add training weights accounting for imbalance in data
@@ -96,7 +96,7 @@ def main(cfg: DictConfig) -> None:
             output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
             weight_features = ['w_class_imbalance', 'w_cp', 'class_weight', 'weight']
         else:
-            weight_features = None
+            weight_features = None # no weights stored for prediction
 
         # apply normalisation
         output_sample[cont_features] = input_pipe.transform(output_sample[cont_features])
