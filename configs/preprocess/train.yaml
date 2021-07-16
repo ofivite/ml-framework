@@ -71,7 +71,7 @@ input_samples:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-cont_features: # will be stored in the output file and used for training
+cont_features: # will be loaded as input and stored in the output foldfile as continuous features
   - pt_1
   - pt_2
   - jpt_1
@@ -84,10 +84,11 @@ cont_features: # will be stored in the output file and used for training
   - puppimt_1
   - pt_tt
   - puppimet
-cat_features: # will be stored in the output file and used for training
+cat_features: # will be loaded as input and stored in the output foldfile as categorical features
   - njets
-misc_features: # miscellaneous features for intermediate computations, not necessarily stored (see preprocess.py)
+misc_features: # will be loaded as input (used for intermediate computations) and stored in the output foldfile as additional features
   - weight
+  - evt
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

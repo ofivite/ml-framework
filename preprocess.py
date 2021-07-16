@@ -103,7 +103,7 @@ def main(cfg: DictConfig) -> None:
             for class_label in set(data[_target]):
                 output_sample.loc[output_sample[_target] == class_label, 'class_weight'] = np.sum(data['weight'])/np.sum(data.loc[data[_target] == class_label, 'weight'])
             output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
-            weight_features = ['w_class_imbalance', 'w_cp', 'class_weight', 'weight']
+            misc_features = set(misc_features + ['w_class_imbalance', 'w_cp', 'class_weight', 'weight'])
         else:
             weight_features = None # no weights stored for prediction
 
@@ -117,7 +117,7 @@ def main(cfg: DictConfig) -> None:
                     cat_feats=cat_features, cat_maps=cat_maps,
                     targ_feats=_target, targ_type='int',
                     wgt_feat=None,
-                    misc_feats=weight_features,
+                    misc_feats=misc_features,
                     savename=to_absolute_path(f'{output_path}/{output_sample_name}')
                     )
 
