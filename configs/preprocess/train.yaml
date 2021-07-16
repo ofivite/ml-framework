@@ -98,7 +98,7 @@ pca: False
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 output_path: data/{year}/multi/dev/skims # relative path
-output_filename_template: '{sample_name}.hdf5'
+output_filename_template: '{sample_name}'
 output_samples:
   - train
   - test
