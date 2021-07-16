@@ -20,7 +20,7 @@ from omegaconf import OmegaConf, DictConfig
 
 from utils.processing import fill_placeholders
 
-@hydra.main(config_path="configs")
+@hydra.main(config_path="configs/preprocess")
 def main(cfg: DictConfig) -> None:
     cont_features = OmegaConf.to_object(cfg.cont_features)
     cat_features = OmegaConf.to_object(cfg.cat_features)
@@ -34,7 +34,7 @@ def main(cfg: DictConfig) -> None:
     _target = 'target' # internal target name
     for sample in cfg.input_samples:
         if cfg.for_training:
-            assert type(sample)==dict and len(sample)==1 # for training, sample is a dictionary with 1 element, see the cfg file
+            assert len(sample)==1 # for training, sample is a dictionary with 1 element, see the cfg file
             sample_name = list(sample.keys())[0]
         else:
             assert type(sample)==str
@@ -51,9 +51,9 @@ def main(cfg: DictConfig) -> None:
                     data_sample[_target] = process_cfg['class']
                     data_samples.append(data_sample)
             else:
-                data_samples = f[cfg.input_tree_name].arrays(input_branches, cut=None, library='pd')
-                data_samples['group_name'] = sample_name
-                data_samples[_target] = -1
+                data_sample = f[cfg.input_tree_name].arrays(input_branches, cut=None, library='pd')
+                data_sample['group_name'] = sample_name
+                data_sample[_target] = -1
                 data_samples.append(data_sample)
     data = pd.concat(data_samples, ignore_index=True)
     del(data_samples); gc.collect()
