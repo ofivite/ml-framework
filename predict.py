@@ -55,7 +55,7 @@ def main(cfg: DictConfig) -> None:
         output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
         R_df = R.RDF.MakeNumpyDataFrame({'pred_class': y_pred_class,
                                          'pred_class_proba': y_pred_class_proba,
-                                          **{misc_feature: df[misc_feature].to_numpy() for misc_feature in misc_features}
+                                          **{misc_feature: df[misc_feature].to_numpy().astype(np.float32) for misc_feature in misc_features}
                                          })
         R_df.Snapshot(cfg.output_tree_name, f'{output_path}/{output_filename}')
         del(df, R_df); gc.collect()
