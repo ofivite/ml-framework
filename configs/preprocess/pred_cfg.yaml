@@ -19,7 +19,7 @@ input_samples:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-input_pipe_file: 'data/2018/multi/dev/input_pipe.pkl' # relative path
+input_pipe_file: 'data/2018/multi/dev/skims/input_pipe.pkl' # relative path
 cont_features: # will be stored in the output file and used for training
   - pt_1
   - pt_2
