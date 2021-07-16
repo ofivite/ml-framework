@@ -20,7 +20,7 @@ from omegaconf import OmegaConf, DictConfig
 
 from utils.processing import fill_placeholders
 
-@hydra.main(config_path="configs", config_name="preprocess_cfg")
+@hydra.main(config_path="configs")
 def main(cfg: DictConfig) -> None:
     cont_features = OmegaConf.to_object(cfg.cont_features)
     cat_features = OmegaConf.to_object(cfg.cat_features)
