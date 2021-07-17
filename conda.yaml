@@ -23,6 +23,5 @@ dependencies:
   - uproot
   - root
   - pip:
-    - jedi==0.17.2
-    - lumin==0.7.2
-    - hydra-core>=1.1.0
+    - lumin
+    - hydra-core
