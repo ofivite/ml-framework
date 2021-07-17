@@ -28,7 +28,7 @@ def main(cfg: DictConfig) -> None:
     misc_features = OmegaConf.to_object(cfg.misc_features)
     input_branches = OmegaConf.to_object(cfg.input_branches)
     input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
-    output_path = fill_placeholders(cfg.output_path, {'{year}': cfg.year})
+    output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
     os.makedirs(output_path, exist_ok=True)
 
     # combine all input data nodes into a single pandas dataframe
@@ -80,7 +80,7 @@ def main(cfg: DictConfig) -> None:
         assert len(output_sample_names)==len(output_samples)
 
         # fit scaling pipe
-        input_pipe = fit_input_pipe(output_samples[0], cont_features, to_absolute_path(f'{output_path}/{cfg.pipe_name}'), norm_in=cfg.norm, pca=cfg.pca)
+        input_pipe = fit_input_pipe(output_samples[0], cont_features, f'{output_path}/{cfg.pipe_name}', norm_in=cfg.norm, pca=cfg.pca)
     else:
         strat_key = None # no stratification for prediction
         output_samples = [group for _, group in data.groupby('group_name')]
@@ -119,7 +119,7 @@ def main(cfg: DictConfig) -> None:
                     targ_feats=_target, targ_type='int',
                     wgt_feat=None,
                     misc_feats=misc_features,
-                    savename=to_absolute_path(f'{output_path}/{output_sample_name}')
+                    savename=f'{output_path}/{output_sample_name}'
                     )
 
 if __name__ == '__main__':
