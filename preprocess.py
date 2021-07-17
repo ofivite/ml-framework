@@ -90,27 +90,26 @@ def main(cfg: DictConfig) -> None:
         with open(to_absolute_path(cfg.input_pipe_file), 'rb') as f:
             input_pipe = pickle.load(f)
 
+    # derive training weights
+    if cfg.for_training:
+        w_class_imbalance_map, class_weight_map = {}, {}
+        for class_label in set(data[_target]):
+            w_class_imbalance_map[class_label] = len(data)/len(data.query(f'{_target}=={class_label}'))
+            class_weight_map[class_label] = np.sum(data['weight'])/np.sum(data.query(f'{_target} == {class_label}')['weight'])
+
     # loop over output nodes and store each into a fold file
     for output_sample_name, output_sample in zip(output_sample_names, output_samples):
-        # weights section
+        # add training weights accounting for imbalance in data
         if cfg.for_training:
-            # add training weights accounting for imbalance in data
-            output_sample['w_class_imbalance'] = 1
-            for class_label in set(data[_target]):
-                output_sample.loc[output_sample[_target] == class_label, 'w_class_imbalance'] = data.shape[0]/data.query(f'{_target}=={class_label}').shape[0]
-
-            # add training weights as used in CP in HTT analysis
-            output_sample['class_weight'] = 1 # these are derived per each class as: sum("weight") for whole dataset / sum("weight") for class
-            for class_label in set(data[_target]):
-                output_sample.loc[output_sample[_target] == class_label, 'class_weight'] = np.sum(data['weight'])/np.sum(data.loc[data[_target] == class_label, 'weight'])
+            output_sample['w_class_imbalance'] = output_sample[_target].map(w_class_imbalance_map)
+            output_sample['class_weight'] = output_sample[_target].map(class_weight_map)
             output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
-        else:
-            weight_features = None # no weights stored for prediction
 
         # apply normalisation
         output_sample[cont_features] = input_pipe.transform(output_sample[cont_features])
 
         # store into a hdf5 fold file
+        print('    ')
         df2foldfile(df=output_sample,
                     n_folds=cfg.n_folds, strat_key=strat_key,
                     cont_feats=cont_features,
