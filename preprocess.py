@@ -81,8 +81,9 @@ def main(cfg: DictConfig) -> None:
         input_pipe = fit_input_pipe(output_samples[0], cont_features, f'{output_path}/{cfg.pipe_name}', norm_in=cfg.norm, pca=cfg.pca)
     else:
         strat_key = None # no stratification for prediction
-        output_samples = [group for _, group in data.groupby('group_name')]
-        output_sample_names = data.groupby('group_name').groups.keys()
+        outputs = {name: group for name, group in data.groupby('group_name')}
+        output_samples = outputs.values()
+        output_sample_names = output_samples.keys()
         output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
 
         # fetch already fitted pipe
