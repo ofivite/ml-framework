@@ -83,7 +83,7 @@ def main(cfg: DictConfig) -> None:
         strat_key = None # no stratification for prediction
         outputs = {name: group for name, group in data.groupby('group_name')}
         output_samples = outputs.values()
-        output_sample_names = output_samples.keys()
+        output_sample_names = outputs.keys()
         output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
 
         # fetch already fitted pipe
