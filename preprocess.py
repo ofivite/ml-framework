@@ -26,11 +26,11 @@ def main(cfg: DictConfig) -> None:
     cont_features = OmegaConf.to_object(cfg.cont_features)
     cat_features = OmegaConf.to_object(cfg.cat_features)
     misc_features = OmegaConf.to_object(cfg.misc_features)
-    input_branches = cont_features + cat_features + misc_features
+    input_branches = OmegaConf.to_object(cfg.input_branches)
     input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
     output_path = fill_placeholders(cfg.output_path, {'{year}': cfg.year})
     os.makedirs(output_path, exist_ok=True)
-    
+
     # combine all input data nodes into a single pandas dataframe
     data_samples = []
     _target = 'target' # internal target name
@@ -105,7 +105,6 @@ def main(cfg: DictConfig) -> None:
             for class_label in set(data[_target]):
                 output_sample.loc[output_sample[_target] == class_label, 'class_weight'] = np.sum(data['weight'])/np.sum(data.loc[data[_target] == class_label, 'weight'])
             output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
-            misc_features = set(misc_features + ['w_class_imbalance', 'w_cp', 'class_weight', 'weight'])
         else:
             weight_features = None # no weights stored for prediction
 
