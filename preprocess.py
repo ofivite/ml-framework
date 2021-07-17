@@ -12,6 +12,7 @@ from lumin.data_processing.pre_proc import fit_input_pipe, proc_cats
 from lumin.data_processing.file_proc import df2foldfile
 from lumin.nn.data.fold_yielder import FoldYielder
 
+import os
 import pickle
 import gc
 import hydra
@@ -28,7 +29,8 @@ def main(cfg: DictConfig) -> None:
     input_branches = cont_features + cat_features + misc_features
     input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
     output_path = fill_placeholders(cfg.output_path, {'{year}': cfg.year})
-
+    os.makedirs(output_path, exist_ok=True)
+    
     # combine all input data nodes into a single pandas dataframe
     data_samples = []
     _target = 'target' # internal target name

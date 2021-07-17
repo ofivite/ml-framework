@@ -1,3 +1,4 @@
+import os
 import yaml
 import gc
 import hydra
@@ -18,6 +19,8 @@ def main(cfg: DictConfig) -> None:
     # fill placeholders in the cfg parameters
     input_path = to_absolute_path(fill_placeholders(cfg.input_path, {'{year}': cfg.year}))
     output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
+    os.makedirs(output_path, exist_ok=True)
+
     model_path = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/artifacts/model')
     input_pipe = to_absolute_path(fill_placeholders(cfg.input_pipe, {'{year}': cfg.year}))
 
@@ -53,6 +56,8 @@ def main(cfg: DictConfig) -> None:
         # store predictions in RDataFrame and snapshot it into output ROOT file
         print(f"        storing to output file ...")
         output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+        if os.path.exists(f'{output_path}/{output_filename}'):
+            os.system(f'rm {output_path}/{output_filename}')
         R_df = R.RDF.MakeNumpyDataFrame({'pred_class': y_pred_class,
                                          'pred_class_proba': y_pred_class_proba,
                                           **{misc_feature: df[misc_feature].to_numpy() for misc_feature in misc_features}
