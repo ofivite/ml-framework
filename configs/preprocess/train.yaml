@@ -1,4 +1,6 @@
 for_training: True
+
+# input section
 year: 2018
 input_path: /nfs/dust/cms/user/rasp/storage/cardinia/{year}/InputDNNmt_June9-PAS # should be absolute path
 input_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_{year}.root' # assume the same pattern for all input sample files
@@ -68,9 +70,6 @@ input_samples:
       QCD:
         cut: '(byMediumDeepTau2017v2p1VSjet_2>0.5) & (iso_1<0.15) & (os<0.5)'
         class: 2
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 input_branches: # will be loaded from input ROOT files
   - pt_1
   - pt_2
@@ -87,6 +86,20 @@ input_branches: # will be loaded from input ROOT files
   - njets
   - evt
   - weight
+
+# train/test splitter & scaler 
+train_size: 0.8
+norm: True
+pca: False
+
+# output section
+output_path: data/{year}/multi/skims # relative path
+output_filename_template: '{sample_name}'
+output_samples:
+  - train
+  - test
+pipe_name: 'input_pipe' # filename for saving the feature scaling pipe
+n_folds: 10 # will split output sample into these number of folds before saving to hdf5 file
 cont_features: # will be stored in the output foldfile as continuous features
   - pt_1
   - pt_2
@@ -108,19 +121,3 @@ misc_features: # will be stored in the output foldfile as miscellaneous features
   - w_class_imbalance # see definition in preprocess.py
   - w_cp
   - class_weight
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-train_size: 0.8
-norm: True
-pca: False
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-output_path: data/{year}/multi/skims # relative path
-output_filename_template: '{sample_name}'
-output_samples:
-  - train
-  - test
-pipe_name: 'input_pipe' # filename for saving the feature scaling pipe
-n_folds: 10 # will split output sample into these number of folds before saving to hdf5 file

@@ -19,10 +19,15 @@ import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
 
+from utils.processing import fill_placeholders
 from utils.plotting import plot_class_score
 
 @hydra.main(config_path="configs", config_name="train_cfg")
 def main(cfg: DictConfig) -> None:
+    train_file = fill_placeholders(to_absolute_path(cfg.train_file), {'{year}': cfg.year})
+    test_file = fill_placeholders(to_absolute_path(cfg.test_file), {'{year}': cfg.year})
+    input_pipe_file = fill_placeholders(to_absolute_path(cfg.input_pipe_file), {'{year}': cfg.year})
+
     # enable auto logging for mlflow
     mlflow.lightgbm.autolog()
 
@@ -32,14 +37,14 @@ def main(cfg: DictConfig) -> None:
     target_name = 'gen_target' # internal target name defined inside of lumin
 
     # prepare train/test data
-    train_fy = FoldYielder(to_absolute_path(cfg.train_file), input_pipe=to_absolute_path(cfg.input_pipe_file))
+    train_fy = FoldYielder(train_file, input_pipe=input_pipe_file)
     train_df = train_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
     train_df['w_cp'] = train_fy.get_column('w_cp')
     train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
     train_df['plot_weight'] = train_fy.get_column('weight')
     train_data = lgb.Dataset(train_df[train_features], label=train_df[target_name], weight=train_df[weight_name])
     #
-    test_fy = FoldYielder(to_absolute_path(cfg.test_file), input_pipe=to_absolute_path(cfg.input_pipe_file))
+    test_fy = FoldYielder(test_file, input_pipe=input_pipe_file)
     test_df = test_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
     test_df['w_cp'] = test_fy.get_column('w_cp')
     test_df['w_class_imbalance'] = test_fy.get_column('w_class_imbalance')

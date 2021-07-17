@@ -1,7 +1,10 @@
-train_file: 'data/2018/multi/skims/train.hdf5'
-test_file: 'data/2018/multi/skims/test.hdf5'
-input_pipe_file: 'data/2018/multi/skims/input_pipe.pkl'
+# path to the train/test data & scaling pipe
+year: 2016
+train_file: 'data/{year}/multi/skims/train.hdf5'
+test_file: 'data/{year}/multi/skims/test.hdf5'
+input_pipe_file: 'data/{year}/multi/skims/input_pipe.pkl'
 
+# features to be used for training
 cont_features:
   - pt_1
   - pt_2
@@ -18,8 +21,10 @@ cont_features:
 cat_features:
   - njets
 
+# training weight
 weight_name: 'w_cp'
 
+# model parameters
 model_param:
   objective: 'multiclass'
   num_class: 3
@@ -37,8 +42,9 @@ model_param:
   num_threads: 4
   verbosity: 1
   seed: 1357
-  num_iterations: 20
+  num_iterations: 10
 
+# plotting styles
 class_to_info:
   0:
     name: higgs

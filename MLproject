@@ -3,15 +3,17 @@ conda-env: conda.yaml
 entry_points:
   multi:
     parameters:
+      year: {type: str, default: 2018}
       num_iterations: {type: int, default: 10}
       weight_name: {type: int, default: "w_cp"}
-    command: "python train.py \
+    command: "python train.py year={year} \
                               model_param.num_iterations={num_iterations} \
                               weight_name={weight_name}"
   binary:
     parameters:
+      year: {type: str, default: 2018}
       num_iterations: {type: int, default: 10}
-    command: "python train.py \
+    command: "python train.py year={year} \
                               model_param.objective=binary \
                               ~model_param.num_class \
                               model_param.metric=[auc,binary_error,binary_logloss] \
