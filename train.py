@@ -17,7 +17,7 @@ from omegaconf import OmegaConf, DictConfig
 from utils.processing import fill_placeholders
 from utils.plotting import plot_class_score
 
-@hydra.main(config_path="configs", config_name="train_cfg")
+@hydra.main(config_path="configs", config_name="train")
 def main(cfg: DictConfig) -> None:
     train_file = fill_placeholders(to_absolute_path(cfg.train_file), {'{year}': cfg.year})
     test_file = fill_placeholders(to_absolute_path(cfg.test_file), {'{year}': cfg.year})

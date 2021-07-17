@@ -14,7 +14,7 @@ from mlflow.pyfunc import load_model
 
 from utils.processing import fill_placeholders
 
-@hydra.main(config_path="configs", config_name="predict_cfg")
+@hydra.main(config_path="configs", config_name="predict")
 def main(cfg: DictConfig) -> None:
     # fill placeholders in the cfg parameters
     input_path = to_absolute_path(fill_placeholders(cfg.input_path, {'{year}': cfg.year}))
