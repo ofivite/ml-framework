@@ -62,7 +62,6 @@ To train and track the model create an experiment (unless already done) and run 
 *  project directory (`.` - current)
 
 ```bash
-# mlflow experiments create -n test
 mlflow run -e multi --experiment-name test -P year=2018 -P num_iterations=5 --no-conda .
 ```
 
@@ -93,7 +92,7 @@ ssh -N -f -L localhost:${LOCAL_PORT_ID}:localhost:${REMOTE_PORT_ID} ${SERVER}
 Then one can access `mlflow` UI locally by going to http://localhost:5010 in a browser (here, `5010` is a local port id taken from a code snippet example).
 
 ## Making predictions
-Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (skimmed by `preprocess.py`). This is performed with `predict.py` script which loads the model with `mlflow` given its `experiment_ID` and `run_ID`, opens each of the input fold files with `FoldYielder` and passes the data to the model. The output in the form of _maximum class probability_ and the _corresponding class_ along with `misc_features` is saved into the output ROOT file through an [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class. Lastly, `predict.py` uses the configuration file `configs/predict.yaml` to fetch the necessary parameters, e.g. the list input files and output directory. Note, that the default name of the config file is specified in `@hydra.main()` decorator inside of `predict.py` and not required to be passed in the command line. That is, to produce predictions for a `sample_names` files corresponding to a `year` as they are specified in `configs/predict.yaml`, execute:
+Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (skimmed by `preprocess.py`). This is performed with `predict.py` script which loads the model with `mlflow` given its `experiment_ID` and `run_ID`, opens each of the input fold files with `FoldYielder` and passes the data to the model. The output in the form of _maximum class probability_ and the _corresponding class_ along with `misc_features` is saved into the output ROOT file through an [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class. Lastly, `predict.py` uses the configuration file `configs/predict.yaml` to fetch the necessary parameters, e.g. the list input files or `run_ID`. Note, that the default name of the config file is specified in `@hydra.main()` decorator inside of `predict.py` and not required to be passed in the command line. That is, to produce predictions for a `sample_names` files corresponding to a `year` as they are specified in `configs/predict.yaml`, execute:
 
 ```bash
 python predict.py
