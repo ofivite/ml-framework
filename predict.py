@@ -24,6 +24,9 @@ def main(cfg: DictConfig) -> None:
     model_path = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/artifacts/model')
     input_pipe = to_absolute_path(fill_placeholders(cfg.input_pipe, {'{year}': cfg.year}))
 
+    # load mlflow logged model
+    model = load_model(model_path)
+    
     # extract names of training features from mlflow-stored model
     misc_features = OmegaConf.to_object(cfg.misc_features)
     train_features = []
@@ -43,9 +46,6 @@ def main(cfg: DictConfig) -> None:
         df = fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
         for f in misc_features: # add misc features
             df[f] = fy.get_column(f)
-
-        # load mlflow logged model
-        model = load_model(model_path)
 
         # make predictions
         print(f"        predicting ...")
