@@ -15,6 +15,7 @@ dependencies:
   - numpy
   - numba
   - pandas
+  - pytables
   - scipy
   - statsmodels
   - scikit-learn
