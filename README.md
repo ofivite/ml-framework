@@ -77,15 +77,20 @@ REMOTE_PORT_ID=5000
 mlflow ui -p ${REMOTE_PORT_ID}
 ```
 
-In case of running on a remote machine and not being able to open a browser (as a GUI) there, one can listen to a remote server via ssh and interact with it on a local machine (e.g. personal laptop). The commands below will make an ssh tunnel and forward remote port to a local one:
+In case of running on a remote machine and not being able to open a browser (as a GUI) there, one can listen to a remote server via `ssh` and interact with it on a local machine (e.g. personal laptop). Firstly, find out the remote host machine name by running:
+```bash
+echo ${USERNAME}@${HOSTNAME}
+```
+
+Then, execute the commands below on a local machine (insert the output of the previous command in `SERVER`) to make an ssh tunnel and forward remote port to a local one:
 ```bash
 REMOTE_PORT_ID=5000
 LOCAL_PORT_ID=5010
-SERVER=${USERNAME}@${HOSTNAME}
+# SERVER=...
 ssh -N -f -L localhost:${LOCAL_PORT_ID}:localhost:${REMOTE_PORT_ID} ${SERVER}
 ```
 
-Then one can access `mlflow ui` locally by going to http://localhost:5010 in a browser (here, `5010` is a local port id taken from a code snippet example).
+Then one can access `mlflow` UI locally by going to http://localhost:5010 in a browser (here, `5010` is a local port id taken from a code snippet example).
 
 ## Making predictions
 Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (skimmed by `preprocess.py`). This is performed with `predict.py` script which loads the model with `mlflow` given its `experiment_ID` and `run_ID`, opens each of the input fold files with `FoldYielder` and passes the data to the model. The output in the form of _maximum class probability_ and the _corresponding class_ along with `misc_features` is saved into the output ROOT file through an [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class. Lastly, `predict.py` uses the configuration file `configs/predict.yaml` to fetch the necessary parameters, e.g. the list input files and output directory. Note, that the default name of the config file is specified in `@hydra.main()` decorator inside of `predict.py` and not required to be passed in the command line. That is, to produce predictions for a `sample_names` files corresponding to a `year` as they are specified in `configs/predict.yaml`, execute:
