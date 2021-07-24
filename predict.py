@@ -26,7 +26,7 @@ def main(cfg: DictConfig) -> None:
 
     # load mlflow logged model
     model = load_model(model_path)
-    
+
     # extract names of training features from mlflow-stored model
     misc_features = OmegaConf.to_object(cfg.misc_features)
     train_features = []
@@ -50,8 +50,8 @@ def main(cfg: DictConfig) -> None:
         # make predictions
         print(f"        predicting ...")
         y_proba = model.predict(df[train_features])
-        y_pred_class = np.argmax(y_proba, axis=1).astype(np.int32)
-        y_pred_class_proba = np.max(y_proba, axis=1).astype(np.float32)
+        y_pred_class = np.argmax(y_proba, axis=-1).astype(np.int32)
+        y_pred_class_proba = np.max(y_proba, axis=-1).astype(np.float32)
 
         # store predictions in RDataFrame and snapshot it into output ROOT file
         print(f"        storing to output file ...")

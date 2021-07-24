@@ -67,8 +67,8 @@ def main(cfg: DictConfig) -> None:
             mlflow.log_figure(fig, "binary_score.png")
         if cfg.model_param.objective == 'multiclass':
             y_proba = model.predict(test_df[train_features])
-            y_pred_class = np.argmax(y_proba, axis=1)
-            y_pred_class_proba = np.max(y_proba, axis=1)
+            y_pred_class = np.argmax(y_proba, axis=-1)
+            y_pred_class_proba = np.max(y_proba, axis=-1)
             df_pred = pd.DataFrame({'pred_class_proba': y_pred_class_proba, 'pred_class': y_pred_class,
                                     'true_class': test_df.gen_target, 'plot_weight': test_df['plot_weight']
                                     })
