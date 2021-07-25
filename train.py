@@ -71,7 +71,7 @@ def main(cfg: DictConfig) -> None:
 
             # infer signature of the model and log into mlflow
             signature = infer_signature(train_fold_df[train_features], model.predict(train_fold_df[train_features]))
-            mlflow.lightgbm.log_model(model, f'model_{i_fold}', signature=signature, input_example=train_fold_df.iloc[0][train_features].to_frame())
+            mlflow.lightgbm.log_model(model, f'model_{i_fold}', signature=signature, input_example=train_fold_df.iloc[0][train_features].to_numpy())
             # mlflow.log_artifact(train_idx)
 
         if cfg.model_param.objective == 'binary':
