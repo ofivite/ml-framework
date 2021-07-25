@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import LeaveOneGroupOut
 from sklearn.metrics import accuracy_score, log_loss
 import lightgbm as lgb
 import mlflow
 import mlflow.lightgbm
+from mlflow.models.signature import infer_signature
 
 from lumin.nn.data.fold_yielder import FoldYielder
 
@@ -37,24 +38,41 @@ def main(cfg: DictConfig) -> None:
     train_df['w_cp'] = train_fy.get_column('w_cp')
     train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
     train_df['plot_weight'] = train_fy.get_column('weight')
-    train_data = lgb.Dataset(train_df[train_features], label=train_df[target_name], weight=train_df[weight_name])
+    train_df[cfg.logo_feature] = train_fy.get_column(cfg.logo_feature)
+    train_df['fold_id'] = train_df[cfg.logo_feature] % cfg.n_splits
     #
     test_fy = FoldYielder(test_file, input_pipe=input_pipe_file)
     test_df = test_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
-    test_df['w_cp'] = test_fy.get_column('w_cp')
-    test_df['w_class_imbalance'] = test_fy.get_column('w_class_imbalance')
     test_df['plot_weight'] = test_fy.get_column('weight')
-    validation_data = lgb.Dataset(test_df[train_features], label=test_df[target_name], weight=test_df[weight_name], reference=train_data)
 
-    # check that class id match in data and in training cfg
-    class_ids = {int(class_id) for class_id in cfg.class_to_info}
-    assert set(train_df.gen_target) == class_ids
-    assert set(test_df.gen_target) == class_ids
-
+    logo = LeaveOneGroupOut() # splitter into folds for training/validation
     with mlflow.start_run():
-        model = lgb.train(OmegaConf.to_object(cfg.model_param), train_data, valid_sets=[train_data, validation_data])
-        y_proba_test = model.predict(test_df[train_features])
+        for i_fold, (train_idx, validation_idx) in enumerate(logo.split(train_df, groups=train_df['fold_id'])):
+            # check that `i_fold` is the same as `fold_id` corresponding to each`validation_idx` split
+            splitted_fold_idx = set(train_df.iloc[validation_idx]['fold_id'])
+            assert len(splitted_fold_idx)==1 and i_fold in splitted_fold_idx
+
+            # construct lightgbm dataset
+            train_data = lgb.Dataset(train_df.iloc[train_idx][train_features],
+                                     label=train_df.iloc[train_idx][target_name],
+                                     weight=train_df.iloc[train_idx][weight_name])
+            validation_data = lgb.Dataset(train_df.iloc[validation_idx][train_features],
+                                          label=train_df.iloc[validation_idx][target_name],
+                                          weight=train_df.iloc[validation_idx][weight_name],
+                                          reference=train_data)
+
+            # train booster
+            model = lgb.train(OmegaConf.to_object(cfg.model_param),
+                              train_data,
+                              valid_sets=[train_data, validation_data], valid_names=[f'train_{i_fold}', f'valid_{i_fold}'])
+
+            # infer signature of the model and log into mlflow
+            signature = infer_signature(train_df.iloc[train_idx][train_features], model.predict(train_df[train_features]))
+            mlflow.lightgbm.log_model(model, f'model_{i_fold}', signature=signature)
+            # mlflow.log_artifact(train_idx)
+
         if cfg.model_param.objective == 'binary':
+            y_proba_test = model.predict(test_df[train_features])
             y_pred_test = y_proba_test > 0.5
             loss = log_loss(test_df[target_name], y_proba_test)
             acc = accuracy_score(test_df[target_name], y_pred_test)
@@ -72,6 +90,12 @@ def main(cfg: DictConfig) -> None:
             df_pred = pd.DataFrame({'pred_class_proba': y_pred_class_proba, 'pred_class': y_pred_class,
                                     'true_class': test_df.gen_target, 'plot_weight': test_df['plot_weight']
                                     })
+
+            # check that class id match in data and in training cfg
+            class_ids = {int(class_id) for class_id in cfg.class_to_info}
+            assert set(train_df.gen_target) == class_ids
+            assert set(test_df.gen_target) == class_ids
+
             for class_id in cfg.class_to_info:
                 class_name = cfg.class_to_info[class_id].name
                 fig_density = plot_class_score(df_pred, class_id, cfg.class_to_info, how='density')
