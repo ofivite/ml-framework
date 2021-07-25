@@ -25,7 +25,7 @@ def main(cfg: DictConfig) -> None:
     input_pipe_file = fill_placeholders(to_absolute_path(cfg.input_pipe_file), {'{year}': cfg.year})
 
     # enable auto logging for mlflow
-    mlflow.lightgbm.autolog()
+    mlflow.lightgbm.autolog(log_models=False) # models are logged separately for each fold
 
     # fetch feature/weight/target names
     train_features = cfg.cont_features + cfg.cat_features # features to be used in training
@@ -48,17 +48,20 @@ def main(cfg: DictConfig) -> None:
     logo = LeaveOneGroupOut() # splitter into folds for training/validation
     with mlflow.start_run():
         for i_fold, (train_idx, validation_idx) in enumerate(logo.split(train_df, groups=train_df['fold_id'])):
+            train_fold_df = train_df.iloc[train_idx]
+            validation_fold_df = train_df.iloc[validation_idx]
+
             # check that `i_fold` is the same as `fold_id` corresponding to each`validation_idx` split
-            splitted_fold_idx = set(train_df.iloc[validation_idx]['fold_id'])
-            assert len(splitted_fold_idx)==1 and i_fold in splitted_fold_idx
+            validation_fold_idx = set(validation_fold_df['fold_id'])
+            assert len(validation_fold_idx)==1 and i_fold in validation_fold_idx
 
             # construct lightgbm dataset
-            train_data = lgb.Dataset(train_df.iloc[train_idx][train_features],
-                                     label=train_df.iloc[train_idx][target_name],
-                                     weight=train_df.iloc[train_idx][weight_name])
-            validation_data = lgb.Dataset(train_df.iloc[validation_idx][train_features],
-                                          label=train_df.iloc[validation_idx][target_name],
-                                          weight=train_df.iloc[validation_idx][weight_name],
+            train_data = lgb.Dataset(train_fold_df[train_features],
+                                     label=train_fold_df[target_name],
+                                     weight=train_fold_df[weight_name])
+            validation_data = lgb.Dataset(validation_fold_df[train_features],
+                                          label=validation_fold_df[target_name],
+                                          weight=validation_fold_df[weight_name],
                                           reference=train_data)
 
             # train booster
@@ -67,8 +70,8 @@ def main(cfg: DictConfig) -> None:
                               valid_sets=[train_data, validation_data], valid_names=[f'train_{i_fold}', f'valid_{i_fold}'])
 
             # infer signature of the model and log into mlflow
-            signature = infer_signature(train_df.iloc[train_idx][train_features], model.predict(train_df[train_features]))
-            mlflow.lightgbm.log_model(model, f'model_{i_fold}', signature=signature)
+            signature = infer_signature(train_fold_df[train_features], model.predict(train_fold_df[train_features]))
+            mlflow.lightgbm.log_model(model, f'model_{i_fold}', signature=signature, input_example=train_fold_df.iloc[0][train_features].to_frame())
             # mlflow.log_artifact(train_idx)
 
         if cfg.model_param.objective == 'binary':
