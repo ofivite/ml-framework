@@ -3,8 +3,8 @@ year: 2016
 train_file: 'data/{year}/multi/skims/train.hdf5'
 test_file: 'data/{year}/multi/skims/test.hdf5'
 input_pipe_file: 'data/{year}/multi/skims/input_pipe.pkl'
-logo_feature: 'evt' # logo = LeaveOneGroupOut
-n_splits: 2 # will split training data into len(set(logo_feature % n_folds)) parts and train a separate model on each
+logo_split_feature: 'evt' # logo = LeaveOneGroupOut
+n_splits: 2 # will split training data into len(set(logo_split_feature % n_folds)) parts and train a separate model on each
 
 # features to be used for training
 cont_features:

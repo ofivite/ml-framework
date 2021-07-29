@@ -7,7 +7,7 @@ entry_points:
       train_file: {type: str, default: "data/2018/multi/skims/train.hdf5"}
       test_file: {type: str, default: "data/2018/multi/skims/test.hdf5"}
       input_pipe_file: {type: str, default: "data/2018/multi/skims/input_pipe.pkl"}
-      logo_feature: {type: str, default: "evt"}
+      logo_split_feature: {type: str, default: "evt"}
       n_splits: {type: int, default: 2}
       num_iterations: {type: int, default: 10}
       weight_name: {type: int, default: "w_cp"}
@@ -15,7 +15,7 @@ entry_points:
                               train_file={train_file} \
                               test_file={test_file} \
                               input_pipe_file={input_pipe_file} \
-                              logo_feature={logo_feature} \
+                              logo_split_feature={logo_split_feature} \
                               n_splits={n_splits} \
                               model_param.num_iterations={num_iterations} \
                               weight_name={weight_name}"
