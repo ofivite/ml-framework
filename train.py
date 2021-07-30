@@ -27,8 +27,8 @@ def main(cfg: DictConfig) -> None:
 
     # enable auto logging for mlflow & log some cfg parameters
     mlflow.lightgbm.autolog(log_models=False) # models are logged separately for each fold
-    mlflow.log_params({'
-        train_file': train_file,
+    mlflow.log_params({
+        'train_file': train_file,
         'test_file': test_file,
         'input_pipe_file': input_pipe_file,
         'xtrain_split_feature': cfg.xtrain_split_feature,
