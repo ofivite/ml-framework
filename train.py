@@ -45,9 +45,15 @@ def main(cfg: DictConfig) -> None:
     test_df = test_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
     test_df['plot_weight'] = test_fy.get_column('weight')
 
+    # check that there is no more that 5% difference between folds in terms of number of entries
+    fold_id_count_diff = np.std(train_df['fold_id'].value_counts()) / np.mean(train_df['fold_id'].value_counts())
+    if fold_id_count_diff > 0.05:
+        raise Exception(f'Observed {fold_id_count_diff * 100}% relative difference in number of entries across folds. Please check that the split is done equally.')
+
     logo = LeaveOneGroupOut() # splitter into folds for training/validation
     with mlflow.start_run():
         for i_fold, (train_idx, validation_idx) in enumerate(logo.split(train_df, groups=train_df['fold_id'])):
+            print(f'\n\n\n--> training model on fold {i_fold}\n')
             train_fold_df = train_df.iloc[train_idx]
             validation_fold_df = train_df.iloc[validation_idx]
 
