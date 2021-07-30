@@ -63,10 +63,15 @@ def main(cfg: DictConfig) -> None:
             df[f] = fy.get_column(f)
         df['fold_id'] = df[xtrain_split_feature] % n_splits
 
+        # init structure to be written into output file
+        pred_dict = {
+                     'pred_class': [],
+                     'pred_class_proba': [],
+                     **{misc_feature: [] for misc_feature in misc_features}
+                     }
+
         # split into folds and get predictions for each with corresponding model
         logo = LeaveOneGroupOut()
-        y_proba, y_pred_class, y_pred_class_proba = [],[],[]
-        misc_feature_values = {misc_feature: [] for misc_feature in misc_features}
         for i_fold, (_, pred_idx) in enumerate(logo.split(df, groups=df['fold_id'])):
             df_fold = df.iloc[pred_idx]
 
@@ -77,24 +82,19 @@ def main(cfg: DictConfig) -> None:
             # make predictions
             print(f"        predicting fold {i_fold}...")
             y_proba = models[i_fold].predict(df_fold[train_features])
-            y_pred_class.append(np.argmax(y_proba, axis=-1).astype(np.int32))
-            y_pred_class_proba.append(np.max(y_proba, axis=-1).astype(np.float32))
-            [a.append(df_fold[f].to_numpy()) for f, a in misc_feature_values.items()]
+            pred_dict['pred_class'].append(np.argmax(y_proba, axis=-1).astype(np.int32))
+            pred_dict['pred_class_proba'].append(np.max(y_proba, axis=-1).astype(np.float32))
+            [pred_dict[f].append(df_fold[f].to_numpy()) for f in misc_features]
 
-        y_proba = np.concatenate(y_proba)
-        y_pred_class = np.concatenate(y_pred_class)
-        y_pred_class_proba = np.concatenate(y_pred_class_proba)
-        misc_feature_values = {f: np.concatenate(a) for f,a in misc_feature_values.items()}
+        # concatenate folds together
+        pred_dict = {k: np.concatenate(v) for k,v in pred_dict.items()}
 
         # store predictions in RDataFrame and snapshot it into output ROOT file
         print(f"        storing to output file ...")
         output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
         if os.path.exists(f'{output_path}/{output_filename}'):
             os.system(f'rm {output_path}/{output_filename}')
-        R_df = R.RDF.MakeNumpyDataFrame({'pred_class': y_pred_class,
-                                         'pred_class_proba': y_pred_class_proba,
-                                          **misc_feature_values
-                                         })
+        R_df = R.RDF.MakeNumpyDataFrame(pred_dict)
         R_df.Snapshot(cfg.output_tree_name, f'{output_path}/{output_filename}')
         del(df, R_df); gc.collect()
 if __name__ == '__main__':
