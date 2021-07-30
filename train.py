@@ -25,16 +25,6 @@ def main(cfg: DictConfig) -> None:
     input_pipe_file = fill_placeholders(to_absolute_path(cfg.input_pipe_file), {'{year}': cfg.year})
     print(f'\n[INFO] Will split training data set into folds over values of ({cfg.xtrain_split_feature}) feature with number of splits ({cfg.n_splits})')
 
-    # enable auto logging for mlflow & log some cfg parameters
-    mlflow.lightgbm.autolog(log_models=False) # models are logged separately for each fold
-    mlflow.log_params({
-        'train_file': train_file,
-        'test_file': test_file,
-        'input_pipe_file': input_pipe_file,
-        'xtrain_split_feature': cfg.xtrain_split_feature,
-        'weight_name': cfg.weight_name
-    })
-
     # fetch feature/weight/target names
     train_features = cfg.cont_features + cfg.cat_features # features to be used in training
     weight_name = cfg.weight_name
@@ -62,6 +52,16 @@ def main(cfg: DictConfig) -> None:
 
     logo = LeaveOneGroupOut() # splitter into folds for training/validation
     with mlflow.start_run():
+        # enable auto logging for mlflow & log some cfg parameters
+        mlflow.lightgbm.autolog(log_models=False) # models are logged separately for each fold
+        mlflow.log_params({
+            'train_file': train_file,
+            'test_file': test_file,
+            'input_pipe_file': input_pipe_file,
+            'xtrain_split_feature': cfg.xtrain_split_feature,
+            'weight_name': cfg.weight_name
+        })
+
         print(f'\n--> Training model...')
         for i_fold, (train_idx, validation_idx) in enumerate(logo.split(train_df, groups=train_df['fold_id'])):
             print(f'\n    on all folds except fold {i_fold}\n\n')
