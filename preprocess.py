@@ -40,12 +40,12 @@ def main(cfg: DictConfig) -> None:
             assert type(sample)==str
             sample_name = sample
         input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
-        print(f'opening {sample_name}...')
+        print(f'\n--> Opening {sample_name}...')
         with uproot.open(f'{input_path}/{input_filename}') as f:
             if cfg.for_training:
                 processes = list(sample.values())[0]
                 for process_name, process_cfg in processes.items():
-                    print(f'    loading {process_name}...')
+                    print(f'    loading {process_name}')
                     data_sample = f[cfg.input_tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
                     data_sample['group_name'] = process_name
                     data_sample[_target] = process_cfg['class']
@@ -55,10 +55,12 @@ def main(cfg: DictConfig) -> None:
                 data_sample['group_name'] = sample_name
                 data_sample[_target] = -1
                 data_samples.append(data_sample)
+    print('\n--> Combining inputs together')
     data = pd.concat(data_samples, ignore_index=True)
     del(data_samples); gc.collect()
 
     # some preprocessing
+    print('\n--> Preprocessing')
     data.replace([np.inf, -np.inf], np.nan, inplace=True) # lumin handles nans automatically
     data['njets'] = data.njets.clip(0, 5)
 
@@ -98,7 +100,9 @@ def main(cfg: DictConfig) -> None:
             class_weight_map[class_label] = np.sum(data['weight'])/np.sum(data.query(f'{_target} == {class_label}')['weight'])
 
     # loop over output nodes and store each into a fold file
+    print('\n--> Storing to output files...')
     for output_sample_name, output_sample in zip(output_sample_names, output_samples):
+        print(f'    {output_sample_name}')
         # add training weights accounting for imbalance in data
         if cfg.for_training:
             output_sample['w_class_imbalance'] = output_sample[_target].map(w_class_imbalance_map)
@@ -109,7 +113,6 @@ def main(cfg: DictConfig) -> None:
         output_sample[cont_features] = input_pipe.transform(output_sample[cont_features])
 
         # store into a hdf5 fold file
-        print('    ')
         df2foldfile(df=output_sample,
                     n_folds=cfg.n_folds, strat_key=strat_key,
                     cont_feats=cont_features,
