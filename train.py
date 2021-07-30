@@ -38,8 +38,8 @@ def main(cfg: DictConfig) -> None:
     train_df['w_cp'] = train_fy.get_column('w_cp')
     train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
     train_df['plot_weight'] = train_fy.get_column('weight')
-    train_df[cfg.logo_split_feature] = train_fy.get_column(cfg.logo_split_feature)
-    train_df['fold_id'] = train_df[cfg.logo_split_feature] % cfg.n_splits
+    train_df[cfg.xtrain_split_feature] = train_fy.get_column(cfg.xtrain_split_feature)
+    train_df['fold_id'] = train_df[cfg.xtrain_split_feature] % cfg.n_splits
     #
     test_fy = FoldYielder(test_file, input_pipe=input_pipe_file)
     test_df = test_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)

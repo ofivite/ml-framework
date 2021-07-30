@@ -27,11 +27,11 @@ def main(cfg: DictConfig) -> None:
     input_pipe = to_absolute_path(fill_placeholders(cfg.input_pipe, {'{year}': cfg.year}))
 
     # extract feature and number of splits used in LeaveOneGroupOut() during the training
-    with open(to_absolute_path(f'{run_folder}/params/logo_split_feature'), 'r') as f:
-        logo_split_feature = f.read()
+    with open(to_absolute_path(f'{run_folder}/params/xtrain_split_feature'), 'r') as f:
+        xtrain_split_feature = f.read()
     with open(to_absolute_path(f'{run_folder}/params/n_splits'), 'r') as f:
         n_splits = int(f.read())
-    print(f'Will split each data set into folds over values of ({logo_split_feature}) feature with number of splits ({n_splits})')
+    print(f'Will split each data set into folds over values of ({xtrain_split_feature}) feature with number of splits ({n_splits})')
 
     # check that there are as many models logged as needed for retrieved n_splits
     model_idx = {int(s.split('/')[-1].split('model_')[-1]) for s in glob(f'{run_folder}/artifacts/model_*')}
@@ -61,7 +61,7 @@ def main(cfg: DictConfig) -> None:
         df = fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
         for f in misc_features: # add misc features
             df[f] = fy.get_column(f)
-        df['fold_id'] = df[logo_split_feature] % n_splits
+        df['fold_id'] = df[xtrain_split_feature] % n_splits
 
         # split into folds and get predictions for each with corresponding model
         logo = LeaveOneGroupOut()
