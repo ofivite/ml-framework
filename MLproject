@@ -1,7 +1,7 @@
 name: htt-ml
 conda-env: conda.yaml
 entry_points:
-  multi:
+  main:
     parameters:
       year: {type: str, default: "2018"}
       n_splits: {type: int, default: 2}
@@ -11,10 +11,12 @@ entry_points:
                               model_param.num_iterations={num_iterations}"
   binary:
     parameters:
-      year: {type: str, default: 2018}
+      year: {type: str, default: "2018"}
+      n_splits: {type: int, default: 2}
       num_iterations: {type: int, default: 10}
     command: "python train.py year={year} \
+                              n_splits={n_splits} \
+                              model_param.num_iterations={num_iterations} \
                               model_param.objective=binary \
                               ~model_param.num_class \
-                              model_param.metric=[auc,binary_error,binary_logloss] \
-                              model_param.num_iterations={num_iterations}"
+                              model_param.metric=[auc,binary_error,binary_logloss]"
