@@ -32,7 +32,7 @@ def main(cfg: DictConfig) -> None:
     # prepare train/test data
     print('\n--> Loading training data')
     train_fy = FoldYielder(train_file)
-    train_df = train_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
+    train_df = train_fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
     train_df['w_cp'] = train_fy.get_column('w_cp')
     train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
     train_df['plot_weight'] = train_fy.get_column('weight')
@@ -41,7 +41,7 @@ def main(cfg: DictConfig) -> None:
     #
     print('\n--> Loading testing data')
     test_fy = FoldYielder(test_file)
-    test_df = test_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
+    test_df = test_fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
     test_df['plot_weight'] = test_fy.get_column('weight')
 
     # check that there is no more that 5% difference between folds in terms of number of entries

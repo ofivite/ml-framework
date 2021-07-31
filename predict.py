@@ -57,7 +57,7 @@ def main(cfg: DictConfig) -> None:
 
         # extract DataFrame from fold file
         fy = FoldYielder(f'{input_path}/{input_filename}')
-        df = fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
+        df = fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
         for f in misc_features: # add misc features
             df[f] = fy.get_column(f)
         df['fold_id'] = df[xtrain_split_feature] % n_splits
