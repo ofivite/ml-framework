@@ -91,37 +91,5 @@ def main(cfg: DictConfig) -> None:
             mlflow.lightgbm.log_model(model, f'model_{i_fold}', signature=signature, input_example=train_fold_df.iloc[0][train_features].to_numpy())
             # mlflow.log_artifact(train_idx)
 
-        if cfg.model_param.objective == 'binary':
-            y_proba_test = model.predict(test_df[train_features])
-            y_pred_test = y_proba_test > 0.5
-            loss = log_loss(test_df[target_name], y_proba_test)
-            acc = accuracy_score(test_df[target_name], y_pred_test)
-            mlflow.log_metrics({"log_loss": loss, "accuracy": acc})
-
-            fig, ax = plt.subplots()
-            plt.hist(y_proba_test[test_df[target_name]==0], alpha=0.4, bins=30, density=True, label='bkgr')
-            plt.hist(y_proba_test[test_df[target_name]==1], alpha=0.4, bins=30, density=True, label='sig')
-            plt.legend()
-            mlflow.log_figure(fig, "binary_score.png")
-        if cfg.model_param.objective == 'multiclass':
-            y_proba = model.predict(test_df[train_features])
-            y_pred_class = np.argmax(y_proba, axis=-1)
-            y_pred_class_proba = np.max(y_proba, axis=-1)
-            df_pred = pd.DataFrame({'pred_class_proba': y_pred_class_proba, 'pred_class': y_pred_class,
-                                    'true_class': test_df.gen_target, 'plot_weight': test_df['plot_weight']
-                                    })
-
-            # check that class id match in data and in training cfg
-            class_ids = {int(class_id) for class_id in cfg.class_to_info}
-            assert set(train_df.gen_target) == class_ids
-            assert set(test_df.gen_target) == class_ids
-
-            for class_id in cfg.class_to_info:
-                class_name = cfg.class_to_info[class_id].name
-                fig_density = plot_class_score(df_pred, class_id, cfg.class_to_info, how='density')
-                fig_stacked = plot_class_score(df_pred, class_id, cfg.class_to_info, how='stacked', weight='plot_weight')
-                mlflow.log_figure(fig_density, f"plots/density/multiclass_score_{class_name}.html")
-                mlflow.log_figure(fig_stacked, f"plots/stacked/multiclass_score_{class_name}.html")
-
 if __name__ == '__main__':
     main()

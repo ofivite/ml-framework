@@ -98,5 +98,6 @@ def main(cfg: DictConfig) -> None:
         R_df = R.RDF.MakeNumpyDataFrame(pred_dict)
         R_df.Snapshot(cfg.output_tree_name, f'{output_path}/{output_filename}')
         del(df, R_df); gc.collect()
+        
 if __name__ == '__main__':
     main()
