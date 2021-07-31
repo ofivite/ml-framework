@@ -18,5 +18,5 @@ entry_points:
                               n_splits={n_splits} \
                               model_param.num_iterations={num_iterations} \
                               model_param.objective=binary \
-                              ~model_param.num_class \
+                              model_param.num_class=2 \
                               model_param.metric=[auc,binary_error,binary_logloss]"
