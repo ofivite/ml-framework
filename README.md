@@ -51,19 +51,19 @@ python preprocess.py --config-name training_data.yaml year=2018
 This will produce out of the input ROOT files in `input_path` folder `hdf5` skims in the `output_path`, which can be further passed to a model of one's choice.
 
 ## Model training
-To track the model training [`mlflow`](https://mlflow.org/docs/latest/index.html) project has been set up, see its description in `MLproject` file. There is currently two entry points: _binary_ (binary classification problem) and _multi_ (multiclass classification problem), where each runs `python train.py` with necessary parameters from `configs/train.yaml` added/overriden. There is `hydra` also used under the hood to parse those parameters.  
+To track the model training [`mlflow`](https://mlflow.org/docs/latest/index.html) project has been set up, see its description in `MLproject` file. There is currently two entry points: _main_ (multiclass classification problem, default) and _binary_ (binary classification problem), where each runs `python train.py` with necessary parameters from `configs/train.yaml` added/overriden. There is `hydra` also used under the hood to parse those parameters.  
 
 Internally, [`FoldYielder`](https://lumin.readthedocs.io/en/stable/core_concepts.html#reading-fold-files) class of `lumin` is used to extract pandas DataFrames from input foldfiles and pass it on to the model. At the moment, only gradient boosted on trees (aka BDT) with [`lightgbm`](https://lightgbm.readthedocs.io/en/latest/) is implemented to solve the classification problem. More models and architectures will be interfaced with the framework in the nearest future.
 
 To train and track the model create an experiment (unless already done) and run it with `mlflow` specifying:
-*  a corresponding entry point (`-e multi`)
+*  a corresponding entry point (with `-e` option, defaults to `main`)
 *  name of the experiment for the run to be assigned to (`--experiment-name test`)
 *  `--no-conda` to avoid creating new conda environment and running from there
 *  mlflow params with their values (`-P num_iterations=5`, optional, see `MLproject` for all of them and their default values)
 *  project directory (`.` - current)
 
 ```bash
-mlflow run -e multi --experiment-name test -P year=2018 -P num_iterations=5 --no-conda .
+mlflow run --experiment-name test -P year=2018 -P num_iterations=5 --no-conda .
 ```
 
 `mlflow` takes care of logging and saving all the basic information about the training, including the model and optional metrics/artifacts (if specified in `train.py`). This is by default logged into `mlruns/{experiment_ID}/{run_ID}` folder inside of the framework directory.
