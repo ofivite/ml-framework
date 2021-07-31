@@ -59,9 +59,16 @@ def main(cfg: DictConfig) -> None:
     data = pd.concat(data_samples, ignore_index=True)
     del(data_samples); gc.collect()
 
-    # some preprocessing
     print('\n--> Preprocessing')
-    data.replace([np.inf, -np.inf], np.nan, inplace=True) # lumin handles nans automatically
+    # check for NaNs and infs presence
+    data_nans = data.isna()
+    data_infs = data.isin([-np.inf, np.inf])
+    if (nan_sum := np.sum(data_nans.values)) > 0:
+        raise Exception(f'\nFound {nan_sum} NaNs in columns: {data_nans.columns[data_nans.any(axis=0)].tolist()}. Please take care of preprocessing them.')
+    if (inf_sum := np.sum(data_infs.values)) > 0:
+        raise Exception(f'\nFound {inf_sum} inf values in columns: {data_infs.columns[data_infs.any(axis=0)].tolist()}. Please take care of preprocessing them.')
+
+    # clip tails in njets
     data['njets'] = data.njets.clip(0, 5)
 
     # process categorical features to be valued 0->cardinality-1
