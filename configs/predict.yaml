@@ -21,7 +21,6 @@ misc_features: # will be added to output ROOT file along with prediction branche
 # model & scaling pipe to make predictions
 mlflow_experimentID: 1
 mlflow_runID: 13e050761d8f40b69e2379b1c04da6ba
-input_pipe: 'data/{year}/multi/skims/input_pipe.pkl' # the one used for skimming prediction data sets
 
 # output path & names
 output_path: 'data/{year}/multi/pred'

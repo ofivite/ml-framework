@@ -22,7 +22,6 @@ from utils.plotting import plot_class_score
 def main(cfg: DictConfig) -> None:
     train_file = fill_placeholders(to_absolute_path(cfg.train_file), {'{year}': cfg.year})
     test_file = fill_placeholders(to_absolute_path(cfg.test_file), {'{year}': cfg.year})
-    input_pipe_file = fill_placeholders(to_absolute_path(cfg.input_pipe_file), {'{year}': cfg.year})
     print(f'\n[INFO] Will split training data set into folds over values of ({cfg.xtrain_split_feature}) feature with number of splits ({cfg.n_splits})')
 
     # fetch feature/weight/target names
@@ -32,7 +31,7 @@ def main(cfg: DictConfig) -> None:
 
     # prepare train/test data
     print('\n--> Loading training data')
-    train_fy = FoldYielder(train_file, input_pipe=input_pipe_file)
+    train_fy = FoldYielder(train_file)
     train_df = train_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
     train_df['w_cp'] = train_fy.get_column('w_cp')
     train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
@@ -41,7 +40,7 @@ def main(cfg: DictConfig) -> None:
     train_df['fold_id'] = train_df[cfg.xtrain_split_feature] % cfg.n_splits
     #
     print('\n--> Loading testing data')
-    test_fy = FoldYielder(test_file, input_pipe=input_pipe_file)
+    test_fy = FoldYielder(test_file)
     test_df = test_fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
     test_df['plot_weight'] = test_fy.get_column('weight')
 
@@ -57,7 +56,6 @@ def main(cfg: DictConfig) -> None:
         mlflow.log_params({
             'train_file': train_file,
             'test_file': test_file,
-            'input_pipe_file': input_pipe_file,
             'xtrain_split_feature': cfg.xtrain_split_feature,
             'weight_name': cfg.weight_name
         })

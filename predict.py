@@ -23,10 +23,8 @@ def main(cfg: DictConfig) -> None:
     output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
     os.makedirs(output_path, exist_ok=True)
 
-    run_folder = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/')
-    input_pipe = to_absolute_path(fill_placeholders(cfg.input_pipe, {'{year}': cfg.year}))
-
     # extract feature and number of splits used in LeaveOneGroupOut() during the training
+    run_folder = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/')
     with open(to_absolute_path(f'{run_folder}/params/xtrain_split_feature'), 'r') as f:
         xtrain_split_feature = f.read()
     with open(to_absolute_path(f'{run_folder}/params/n_splits'), 'r') as f:
@@ -58,7 +56,7 @@ def main(cfg: DictConfig) -> None:
         input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
 
         # extract DataFrame from fold file
-        fy = FoldYielder(f'{input_path}/{input_filename}', input_pipe=input_pipe)
+        fy = FoldYielder(f'{input_path}/{input_filename}')
         df = fy.get_df(inc_inputs=True, deprocess=False, verbose=False, suppress_warn=True)
         for f in misc_features: # add misc features
             df[f] = fy.get_column(f)
