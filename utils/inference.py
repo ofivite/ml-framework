@@ -1,5 +1,25 @@
+from glob import glob
 import numpy as np
 from sklearn.model_selection import LeaveOneGroupOut
+from mlflow.pyfunc import load_model
+
+def load_models(run_folder):
+    # extract feature and number of splits used in LeaveOneGroupOut() during the training
+    with open(f'{run_folder}/params/xtrain_split_feature', 'r') as f:
+        xtrain_split_feature = f.read()
+    with open(f'{run_folder}/params/n_splits', 'r') as f:
+        n_splits = int(f.read())
+    print(f'\n[INFO] Will split each data set into folds over values of ({xtrain_split_feature}) feature with number of splits ({n_splits})')
+
+    # check that there are as many models logged as needed for retrieved n_splits
+    model_idx = {int(s.split('/')[-1].split('model_')[-1]) for s in glob(f'{run_folder}/artifacts/model_*')}
+    if model_idx != set(range(n_splits)):
+        raise Exception(f'Indices of models in {run_folder}/artifacts ({model_idx}) doesn\'t correspond to the indices of splits used during the training ({set(range(n_splits))})')
+
+    # load mlflow logged models for all folds
+    print(f'\n--> Loading models')
+    models = [load_model(f'{run_folder}/artifacts/model_{i_fold}') for i_fold in range(n_splits)]
+    return models, n_splits, xtrain_split_feature
 
 def predict_folds(df, train_features, misc_features, fold_id_column, models):
     # init structure to be written into output file
