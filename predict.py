@@ -11,10 +11,10 @@ import uproot
 from lumin.nn.data.fold_yielder import FoldYielder
 
 import numpy as np
-from sklearn.model_selection import LeaveOneGroupOut
 from mlflow.pyfunc import load_model
 
 from utils.processing import fill_placeholders
+from utils.inference import predict_folds
 
 @hydra.main(config_path="configs", config_name="predict")
 def main(cfg: DictConfig) -> None:
@@ -38,7 +38,7 @@ def main(cfg: DictConfig) -> None:
 
     # load mlflow logged models for all folds
     print(f'\n--> Loading models')
-    models = {i_fold: load_model(f'{run_folder}/artifacts/model_{i_fold}') for i_fold in range(n_splits)}
+    models = [load_model(f'{run_folder}/artifacts/model_{i_fold}') for i_fold in range(n_splits)]
 
     # extract names of training features from mlflow-stored model
     # note: not checking that the set of features is the same across models
@@ -62,31 +62,8 @@ def main(cfg: DictConfig) -> None:
             df[f] = fy.get_column(f)
         df['fold_id'] = df[xtrain_split_feature] % n_splits
 
-        # init structure to be written into output file
-        pred_dict = {
-                     'pred_class': [],
-                     'pred_class_proba': [],
-                     **{misc_feature: [] for misc_feature in misc_features}
-                     }
-
-        # split into folds and get predictions for each with corresponding model
-        logo = LeaveOneGroupOut()
-        for i_fold, (_, pred_idx) in enumerate(logo.split(df, groups=df['fold_id'])):
-            df_fold = df.iloc[pred_idx]
-
-            # check that `i_fold` is the same as fold ID corresponding to each fold split
-            fold_idx = set(df_fold['fold_id'])
-            assert len(fold_idx)==1 and i_fold in fold_idx
-
-            # make predictions
-            print(f"        predicting fold {i_fold}")
-            y_proba = models[i_fold].predict(df_fold[train_features])
-            pred_dict['pred_class'].append(np.argmax(y_proba, axis=-1).astype(np.int32))
-            pred_dict['pred_class_proba'].append(np.max(y_proba, axis=-1).astype(np.float32))
-            [pred_dict[f].append(df_fold[f].to_numpy()) for f in misc_features]
-
         # concatenate folds together
-        pred_dict = {k: np.concatenate(v) for k,v in pred_dict.items()}
+        pred_dict = predict_folds(df, train_features, misc_features, 'fold_id', models)
 
         # store predictions in RDataFrame and snapshot it into output ROOT file
         print(f"        storing to output file")
