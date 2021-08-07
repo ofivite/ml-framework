@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import LeaveOneGroupOut
+from sklearn.model_selection import LeaveOneGroupOut, ShuffleSplit
 from sklearn.metrics import accuracy_score, log_loss
 import lightgbm as lgb
 import mlflow
@@ -20,53 +20,57 @@ from utils.plotting import plot_class_score
 
 @hydra.main(config_path="configs", config_name="train")
 def main(cfg: DictConfig) -> None:
-    train_file = fill_placeholders(to_absolute_path(cfg.train_file), {'{year}': cfg.year})
-    test_file = fill_placeholders(to_absolute_path(cfg.test_file), {'{year}': cfg.year})
-    print(f'\n[INFO] Will split training data set into folds over values of ({cfg.xtrain_split_feature}) feature with number of splits ({cfg.n_splits})')
-
-    # fetch feature/weight/target names
-    train_features = cfg.cont_features + cfg.cat_features # features to be used in training
-    weight_name = cfg.weight_name
-    target_name = 'gen_target' # internal target name defined inside of lumin
-
-    # prepare train/test data
+    # prepare train data
     print('\n--> Loading training data')
+    train_file = fill_placeholders(to_absolute_path(cfg.train_file), {'{year}': cfg.year})
     train_fy = FoldYielder(train_file)
     train_df = train_fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
     train_df['w_cp'] = train_fy.get_column('w_cp')
     train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
-    train_df['plot_weight'] = train_fy.get_column('weight')
-    train_df[cfg.xtrain_split_feature] = train_fy.get_column(cfg.xtrain_split_feature)
-    train_df['fold_id'] = train_df[cfg.xtrain_split_feature] % cfg.n_splits
-    #
-    print('\n--> Loading testing data')
-    test_fy = FoldYielder(test_file)
-    test_df = test_fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
-    test_df['plot_weight'] = test_fy.get_column('weight')
 
-    # check that there is no more that 5% difference between folds in terms of number of entries
-    fold_id_count_diff = np.std(train_df['fold_id'].value_counts()) / np.mean(train_df['fold_id'].value_counts())
-    if fold_id_count_diff > 0.05:
-        raise Exception(f'Observed {fold_id_count_diff * 100}% relative difference in number of entries across folds. Please check that the split is done equally.')
+    # fetch feature/weight/target names
+    train_features = cfg.cont_features + cfg.cat_features # features to be used in training
+    weight_name = cfg.weight_name
+    target_name = 'gen_target' # internal target name defined inside of lumin library
 
-    logo = LeaveOneGroupOut() # splitter into folds for training/validation
+    if cfg.n_splits > 1:
+        assert type(cfg.n_splits)==int
+        train_df[cfg.xtrain_split_feature] = train_fy.get_column(cfg.xtrain_split_feature)
+        train_df['fold_id'] = (train_df[cfg.xtrain_split_feature] % cfg.n_splits).astype('int32')
+
+        # check that there is no more that 5% difference between folds in terms of number of entries
+        fold_id_count_diff = np.std(train_df['fold_id'].value_counts()) / np.mean(train_df['fold_id'].value_counts())
+        if fold_id_count_diff > 0.05:
+            raise Exception(f'Observed {fold_id_count_diff * 100}% relative difference in number of entries across folds. Please check that the split is done equally.')
+
+        print(f'\n[INFO] Will split training data set into ({cfg.n_splits}) folds over values of ({cfg.xtrain_split_feature}) feature to perform cross-training')
+        splitter = LeaveOneGroupOut()
+        idx_yielder = splitter.split(train_df, groups=train_df['fold_id'])
+    elif cfg.n_splits == 1:
+        print(f'\n[INFO] Will train a single model on ({cfg.train_size}) part of the training data set with the rest used for validation')
+        train_df['fold_id'] = 0
+        splitter = ShuffleSplit(n_splits=1, train_size=cfg.train_size, random_state=1357)
+        idx_yielder = splitter.split(train_df)
+    else:
+        raise ValueError(f'n_splits should be positive integer, got {cfg.n_splits}')
+
     with mlflow.start_run():
         # enable auto logging for mlflow & log some cfg parameters
-        mlflow.lightgbm.autolog(log_models=False) # models are logged separately for each fold
+        mlflow.lightgbm.autolog(log_models=False)
         mlflow.log_params({
             'train_file': train_file,
-            'test_file': test_file,
             'xtrain_split_feature': cfg.xtrain_split_feature,
-            'weight_name': cfg.weight_name
+            'weight_name': cfg.weight_name,
+            'target_name': target_name
         })
 
         print(f'\n--> Training model...')
-        for i_fold, (train_idx, validation_idx) in enumerate(logo.split(train_df, groups=train_df['fold_id'])):
-            print(f'\n    on all folds except fold {i_fold}\n\n')
+        for i_fold, (train_idx, validation_idx) in enumerate(idx_yielder):
+            if cfg.n_splits > 1: print(f'\n\n    leaving fold {i_fold} out\n\n')
             train_fold_df = train_df.iloc[train_idx]
             validation_fold_df = train_df.iloc[validation_idx]
 
-            # check that `i_fold` is the same as fold ID corresponding to each fold split
+            # check that `i_fold` is the same as fold ID corresponding to a validation fold
             validation_fold_idx = set(validation_fold_df['fold_id'])
             assert len(validation_fold_idx)==1 and i_fold in validation_fold_idx
 

@@ -1,9 +1,9 @@
 # path to the train/test data & scaling pipe
 year: 2018
 train_file: 'data/{year}/multi/skims/train.hdf5'
-test_file: 'data/{year}/multi/skims/test.hdf5'
 xtrain_split_feature: 'evt' # xtrain = cross-training
 n_splits: 2 # will split training data into len(set(xtrain_split_feature % n_folds)) parts and train a separate model on each
+train_size: 0.9 # used only if n_splits=1, otherwise will use a left-out fold for testing
 
 # features to be used for training
 cont_features:
