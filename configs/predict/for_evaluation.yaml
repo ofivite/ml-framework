@@ -17,4 +17,4 @@ mlflow_runID: 13e050761d8f40b69e2379b1c04da6ba
 
 # output path & names
 output_path: 'data/{year}/multi/pred'
-output_filename_template: '{sample_name}_{year}_pred.root'
+output_filename_template: '{sample_name}_{year}_pred.csv'
