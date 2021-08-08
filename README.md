@@ -59,16 +59,18 @@ To train and track the model create an experiment (unless already done) and run 
 *  a corresponding entry point (with `-e` option, defaults to `main`)
 *  name of the experiment for the run to be assigned to (`--experiment-name test`)
 *  `--no-conda` to avoid creating new conda environment and running from there
-*  mlflow params with their values (`-P num_iterations=5`, optional, see `MLproject` for all of them and their default values)
+*  mlflow params with their values (e.g. `-P num_iterations=5` or `-P n_splits=2`, optional, see `MLproject` for all of them and their default values)
 *  project directory (`.` - current)
 
 ```bash
-mlflow run --experiment-name test -P year=2018 -P num_iterations=5 --no-conda .
+mlflow run --experiment-name test -P year=2018 -P num_iterations=5 -P n_splits=2 --no-conda .
 ```
+
+*Note*: Oppositely to the manual installation, running `mlflow run` without `--no-conda` flag automatically creates a conda environment from `conda.yaml` cfg file and runs the code from there.
 
 `mlflow` takes care of logging and saving all the basic information about the training, including the model and optional metrics/artifacts (if specified in `train.py`). This is by default logged into `mlruns/{experiment_ID}/{run_ID}` folder inside of the framework directory.
 
-_P.S.:_ Oppositely to the manual installation, running `mlflow run` without `--no-conda` flag automatically creates a conda environment from `conda.yaml` cfg file and runs the code from there.
+It is important to note that the training is implemented in **N-fold manner** (also referred to as *cross-training*). The input dataset will be split into `n_splits` folds (as defined in the training cfg file) and `n_splits` models will be trained, where `model_{i}` uses `fold_{i}` only for metric validation during the training, not for the training itself. The folds are indexed based on the remainder of division of `xtrain_split_feature` column in the input data set by `n_splits`. In case when `n_splits=1` is set, only one model will be trained on `train_size` fraction of the input data set, while the rest of it will be used for validation of loss/metrics during the training.   
 
 ## Tracking results
 Once the training is done, `mlflow` provides a [UI interface](https://www.mlflow.org/docs/latest/tracking.html#tracking-ui) to inspect and compare the logged results across experiments/runs. Firstly, in case of running the code on a remote machine, find out its hostname with:
@@ -94,13 +96,17 @@ ssh -N -f -L localhost:${LOCAL_PORT_ID}:localhost:${REMOTE_PORT_ID} ${SERVER}
 Then one can access `mlflow` UI locally by going to http://localhost:5010 in a browser (here, `5010` is a local port id taken from a code snippet example).
 
 ## Making predictions
-Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (skimmed by `preprocess.py`). This is performed with `predict.py` script which loads the model with `mlflow` given its `experiment_ID` and `run_ID`, opens each of the input fold files with `FoldYielder` and passes the data to the model. The output in the form of _maximum class probability_ and the _corresponding class_ along with `misc_features` is saved into the output ROOT file through an [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class. Lastly, `predict.py` uses the configuration file `configs/predict.yaml` to fetch the necessary parameters, e.g. the list input files or `run_ID`. Note, that the default name of the config file is specified in `@hydra.main()` decorator inside of `predict.py` and not required to be passed in the command line. That is, to produce predictions corresponding to 2018 year, mlflow run "abcd" and other parameters from `configs/predict.yaml` as default, execute:
+Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (skimmed by `preprocess.py`). This is performed with `predict.py` script which loads the model(s) with `mlflow` given the corresponding `experiment_ID` and `run_ID`, opens each of the input fold files with `FoldYielder` and passes the data to the model(s). 
+
+Prediction workflow is also implemented to be in N-fold fashion, which should be transparent to the user similarly to the training step. The number of splits is infered from `mlflow` logs for the corresponding run ID, so that the strategy of the prediction split is automatically adapted to the strategy of the training split. That is, conceptually only `mlflow` run ID and path to input data is needed to produce predictions (_maximum class probability_ and the _corresponding class_, plus `misc_features`).     
+
+There are two possible outputs (each configured with its own cfg file) which can be created at the prediction step. One is of the kind `for_datacards` and the other is `for_evaluation`. For both of them the predictions are produced in the same way, but they are saved to different file formats. For example, in case of option `for_datacards`:
 
 ```bash
-python predict.py year=2018 mlflow_runID=abcd # insert the corresponding run ID here
+python predict.py --config-name for_datacards.yaml year=2018 mlflow_runID=None # insert the corresponding run ID here
 ```
 
-This will produce in `output_path` ROOT files with predictions, which can be now used in the next steps of the analysis. For example, using [`TTree` friends](https://root.cern.ch/root/htmldoc/guides/users-guide/Trees.html#example-3-adding-friends-to-trees) they can be easily augment the original input ROOT files as a new branch based on a common index variable (`evt` in the example below):  
+it will produce in `output_path` ROOT files one per `sample_name` with predictions saved therein to a TTree named `output_tree_name`. To do that, [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class is used to snapshot a python dictionary with prediction arrays into ROOT files. After that they can be used in the next steps of the analysis, e.g. in order to produce datacards. Using [`TTree` friends](https://root.cern.ch/root/htmldoc/guides/users-guide/Trees.html#example-3-adding-friends-to-trees) might be especially helpful in this case to augment the original input ROOT files with predictions added as a new branch (`evt` in the example below is used as a common index):  
 ```cpp
 TFile *f = new TFile("file_pred.root","READ");
 TFile *F = new TFile("file_main.root","READ");
@@ -111,3 +117,10 @@ T->BuildIndex("evt");
 T->AddFriend(t);
 T->Scan("pred_class_proba:evt");
 ```
+
+The second option `for_evaluation` is implemented in order to run the next step of estimating the model performance:
+```bash
+python predict.py --config-name for_evaluation.yaml year=2018 mlflow_runID=None # insert the corresponding run ID here
+```
+
+Here, for a given input files (from `input_path`, as always preprocessed with `preprocess.py`) and a given training (from `mlflow_runID`) predictions will be saved into `.csv` files under `output_path` and also will be logged under exactly the same `mlflow` run ID. After that, simply referring to a single `mlflow` run ID, predictions will be fetched automatically from `mlflow` logs and a dashboard with various metrics and plots can be produced with `evaluate.py` script (WIP).
