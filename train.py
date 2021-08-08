@@ -34,8 +34,8 @@ def main(cfg: DictConfig) -> None:
 
     if cfg.n_splits > 1:
         assert type(cfg.n_splits)==int
-        train_df[cfg.xtrain_split_feature] = train_fy.get_column(cfg.xtrain_split_feature)
-        train_df[fold_id_column] = (train_df[cfg.xtrain_split_feature] % cfg.n_splits).astype('int32')
+        split_feature_values = train_fy.get_column(cfg.xtrain_split_feature)
+        train_df[fold_id_column] = (split_feature_values % cfg.n_splits).astype('int32')
 
         # check that there is no more that 5% difference between folds in terms of number of entries
         fold_id_count_diff = np.std(train_df[fold_id_column].value_counts()) / np.mean(train_df[fold_id_column].value_counts())
