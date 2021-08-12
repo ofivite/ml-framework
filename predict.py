@@ -16,8 +16,8 @@ from utils.inference import load_models, predict_folds
 @hydra.main(config_path="configs/predict")
 def main(cfg: DictConfig) -> None:
     # fill placeholders in the cfg parameters
-    input_path = to_absolute_path(fill_placeholders(cfg.input_path, {'{year}': cfg.year}))
-    output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
+    input_path = to_absolute_path(cfg.input_path)
+    output_path = to_absolute_path(cfg.output_path)
     os.makedirs(output_path, exist_ok=True)
 
     run_folder = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/')
@@ -39,7 +39,7 @@ def main(cfg: DictConfig) -> None:
         for sample_name in cfg.sample_names:
             print(f'\n--> Predicting {sample_name}')
             print(f"        loading data set")
-            input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+            input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name})
 
             # extract DataFrame from fold file
             fy = FoldYielder(f'{input_path}/{input_filename}')
@@ -52,7 +52,7 @@ def main(cfg: DictConfig) -> None:
             pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models)
 
             print(f"        storing to output file")
-            output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+            output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name})
             if os.path.exists(f'{output_path}/{output_filename}'):
                 os.system(f'rm {output_path}/{output_filename}')
             if cfg.kind == 'for_datacards':

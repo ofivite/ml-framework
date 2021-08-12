@@ -25,8 +25,7 @@ def main(cfg: DictConfig) -> None:
     cat_features = OmegaConf.to_object(cfg.cat_features)
     misc_features = OmegaConf.to_object(cfg.misc_features)
     input_branches = OmegaConf.to_object(cfg.input_branches)
-    input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
-    output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
+    output_path = to_absolute_path(cfg.output_path)
     os.makedirs(output_path, exist_ok=True)
 
     # combine all input data nodes into a single pandas dataframe
@@ -39,9 +38,9 @@ def main(cfg: DictConfig) -> None:
         else:
             assert type(sample)==str
             sample_name = sample
-        input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+        input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name})
         print(f'\n--> Opening {sample_name}...')
-        with uproot.open(f'{input_path}/{input_filename}') as f:
+        with uproot.open(f'{cfg.input_path}/{input_filename}') as f:
             if cfg.for_training:
                 processes = list(sample.values())[0]
                 for process_name, process_cfg in processes.items():
@@ -93,7 +92,7 @@ def main(cfg: DictConfig) -> None:
         outputs = {name: group for name, group in data.groupby('group_name')}
         output_samples = outputs.values()
         output_sample_names = outputs.keys()
-        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
+        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n}) for n in output_sample_names]
 
         # fetch already fitted pipe
         with open(to_absolute_path(cfg.input_pipe_file), 'rb') as f:
