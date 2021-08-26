@@ -1,0 +1,18 @@
+mlflow_experimentID: ???
+mlflow_runID: ???
+dataset: ???
+
+# plotting styles
+class_to_info:
+  0:
+    name: higgs
+    color: '194, 71, 92' # RGB format
+    alpha: 0.6 # color transparency
+  1:
+    name: taus
+    color: '90, 90, 90'
+    alpha: 0.7
+  2:
+    name: fakes
+    color: '65, 123, 159'
+    alpha: .9
