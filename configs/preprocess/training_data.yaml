@@ -99,7 +99,7 @@ output_samples:
   - train
   - test
 pipe_name: 'input_pipe' # filename for saving the feature scaling pipe
-n_folds: 10 # will split output sample into these number of folds before saving to hdf5 file
+n_lumin_folds: 10 # will split output sample into these number of folds before saving to hdf5 file
 cont_features: # will be stored in the output foldfile as continuous features
   - pt_1
   - pt_2
