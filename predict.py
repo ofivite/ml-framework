@@ -34,7 +34,7 @@ def main(cfg: DictConfig) -> None:
     fold_id_column = 'fold_id'
 
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
-    with mlflow.start_run(run_id=cfg.mlflow_runID):
+    with mlflow.start_run(experiment_id=cfg.mlflow_experimentID, run_id=cfg.mlflow_runID):
         # loop over input fold files
         for sample_name in cfg.sample_names:
             print(f'\n--> Predicting {sample_name}')

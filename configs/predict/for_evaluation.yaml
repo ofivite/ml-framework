@@ -8,7 +8,7 @@ sample_names:
     - train
     - test
 
-misc_features: # will be added to output ROOT file along with prediction branches
+misc_features: # will be added to output file along with prediction branches
     - evt
     - gen_target
 
@@ -17,5 +17,6 @@ mlflow_experimentID: ???
 mlflow_runID: ???
 
 # output path & names
+# will also log the files to corresponding mlflow run
 output_path: 'data/${year}/multi/pred'
 output_filename_template: '{sample_name}_${year}_pred.csv'

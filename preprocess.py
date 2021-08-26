@@ -120,7 +120,7 @@ def main(cfg: DictConfig) -> None:
 
         # store into a hdf5 fold file
         df2foldfile(df=output_sample,
-                    n_folds=cfg.n_folds, strat_key=strat_key,
+                    n_folds=cfg.n_lumin_folds, strat_key=strat_key,
                     cont_feats=cont_features,
                     cat_feats=cat_features, cat_maps=cat_maps,
                     targ_feats=_target, targ_type='int',
