@@ -45,7 +45,11 @@ def main(cfg: DictConfig) -> None:
             fy = FoldYielder(f'{input_path}/{input_filename}')
             df = fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
             for f in misc_features: # add misc features
-                df[f] = fy.get_column(f)
+                if f not in df.columns:
+                    if f in fy.columns():
+                        df[f] = fy.get_column(f)
+                    else:
+                        raise KeyError(f'Couldn\'t find {f} neither in DataFrame nor in FoldYielder columns')
             df[fold_id_column] = (df[xtrain_split_feature] % n_splits).astype('int32')
 
             # run cross-inference for folds
@@ -62,7 +66,7 @@ def main(cfg: DictConfig) -> None:
                 del(df, R_df); gc.collect()
             elif cfg.kind == 'for_evaluation':
                 df_pred = pd.DataFrame(pred_dict)
-                df_pred.to_csv(f'{output_path}/{output_filename}')
+                df_pred.to_csv(f'{output_path}/{output_filename}', index=False)
                 mlflow.log_artifact(f'{output_path}/{output_filename}', artifact_path='pred')
                 del(df_pred); gc.collect()
             else:
