@@ -1,3 +1,4 @@
+import gc
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -50,6 +51,7 @@ def main(cfg: DictConfig) -> None:
         idx_yielder = splitter.split(train_df)
     else:
         raise ValueError(f'n_splits should be positive integer, got {cfg.n_splits}')
+    train_fy.close(); del(train_fy); gc.collect()
 
     with mlflow.start_run():
         # enable auto logging for mlflow & log some cfg parameters
