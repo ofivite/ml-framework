@@ -59,7 +59,9 @@ def main(cfg: DictConfig) -> None:
             curve_data['figure'].write_image(f'{curve_name}_curve.pdf')
             mlflow.log_figure(curve_data['figure'], f'plots/{cfg.dataset}/{curve_name}_curve.html')
             for class_name in class_names:
-                mlflow.log_metric(f'{curve_name}_auc_{class_name} / {cfg.dataset}', curve_data[f'auc_{class_name}'])
+                for metric_key in curve_data:
+                    if ('auc' in metric_key or 'average_prec' in metric_key):
+                        mlflow.log_metric(f'{curve_name}_{metric_key} / {cfg.dataset}', curve_data[metric_key])
             mlflow.log_artifact(f'{curve_name}_curve.pdf', f'plots/{cfg.dataset}/pdf')
             os.remove(f'{curve_name}_curve.pdf')
     print()

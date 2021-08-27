@@ -85,7 +85,7 @@ def plot_curves(df, class_to_info):
 
         class_name = class_info.name
         curve_dict['roc'][f'auc_{class_name}'] = auc_score
-        curve_dict['pr'][f'auc_{class_name}'] = ap_score
+        curve_dict['pr'][f'average_prec_{class_name}'] = ap_score
         name_roc = f"{class_name} (AUC={auc_score:.2f})"
         name_pr = f"{class_name} (AUC={ap_score:.2f})"
         fig_roc_curve.add_trace(go.Scatter(x=fpr, y=tpr, name=name_roc, mode='lines', marker_color=f'rgb({class_to_info[class_i].color})'))
