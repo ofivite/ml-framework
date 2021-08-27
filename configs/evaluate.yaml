@@ -2,7 +2,7 @@ mlflow_experimentID: ???
 mlflow_runID: ???
 dataset: ??? # name without csv extension
 
-# plotting styles
+# plotting styles & class_id -> class_name mapping
 class_to_info:
   0:
     name: higgs

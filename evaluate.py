@@ -58,7 +58,8 @@ def main(cfg: DictConfig) -> None:
         for curve_name, curve_data in plot_curves(df_pred, cfg.class_to_info).items():
             curve_data['figure'].write_image(f'{curve_name}_curve.pdf')
             mlflow.log_figure(curve_data['figure'], f'plots/{cfg.dataset}/{curve_name}_curve.html')
-            mlflow.log_metric(f'{curve_name}_auc / {cfg.dataset}', curve_data['auc'])
+            for class_name in class_names:
+                mlflow.log_metric(f'{curve_name}_auc_{class_name} / {cfg.dataset}', curve_data[f'auc_{class_name}'])
             mlflow.log_artifact(f'{curve_name}_curve.pdf', f'plots/{cfg.dataset}/pdf')
             os.remove(f'{curve_name}_curve.pdf')
     print()
