@@ -42,6 +42,8 @@ def main(cfg: DictConfig) -> None:
         for confusion_norm in ['true', 'pred']:
             cm = confusion_matrix(df_pred['gen_target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=df_pred['w_class_imbalance'])
             disp = ConfusionMatrixDisplay(cm, display_labels=class_names)
+            for class_id in cfg.class_to_info:
+                mlflow.log_metric(f'cm_{class_id}{class_id}_{confusion_norm} / {cfg.dataset}', cm[class_id,class_id])
 
             fig, ax = plt.subplots(figsize=(10, 9))
             disp.plot(cmap='Blues', ax=ax)
@@ -53,11 +55,12 @@ def main(cfg: DictConfig) -> None:
 
         # plot ROC and precision-recall curves for each class
         print(f'\n--> Plotting ROC & PR curves')
-        for curve_fig_name, curve_fig in zip(['roc_curve', 'precision_recall_curve'], plot_curves(df_pred, cfg.class_to_info)):
-            curve_fig.write_image(f'{curve_fig_name}.pdf')
-            mlflow.log_figure(curve_fig, f'plots/{cfg.dataset}/{curve_fig_name}.html')
-            mlflow.log_artifact(f'{curve_fig_name}.pdf', f'plots/{cfg.dataset}/pdf')
-            os.remove(f'{curve_fig_name}.pdf')
+        for curve_name, curve_data in plot_curves(df_pred, cfg.class_to_info).items():
+            curve_data['figure'].write_image(f'{curve_name}_curve.pdf')
+            mlflow.log_figure(curve_data['figure'], f'plots/{cfg.dataset}/{curve_name}_curve.html')
+            mlflow.log_metric(f'{curve_name}_auc / {cfg.dataset}', curve_data['auc'])
+            mlflow.log_artifact(f'{curve_name}_curve.pdf', f'plots/{cfg.dataset}/pdf')
+            os.remove(f'{curve_name}_curve.pdf')
     print()
 
 if __name__ == '__main__':

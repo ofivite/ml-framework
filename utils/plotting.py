@@ -55,6 +55,7 @@ def plot_class_score(df, class_id, class_to_info, how='density', weight=None):
         raise ValueError(f'Unknown value of how={how}: should be either \"density\" or \"stacked\"')
 
 def plot_curves(df, class_to_info):
+    curve_dict = {'roc': {}, 'pr': {}}
     fig_roc_curve = go.Figure()
     fig_pr_curve = go.Figure()
 
@@ -81,6 +82,8 @@ def plot_curves(df, class_to_info):
         auc_score = roc_auc_score(y_true, y_score, sample_weight=sample_weight)
         precision, recall, _ = precision_recall_curve(y_true, y_score, sample_weight=sample_weight)
         ap_score = average_precision_score(y_true, y_score, sample_weight=sample_weight)
+        curve_dict['roc']['auc'] = auc_score
+        curve_dict['pr']['auc'] = ap_score
 
         class_name = class_info.name
         name_roc = f"{class_name} (AUC={auc_score:.2f})"
@@ -105,4 +108,6 @@ def plot_curves(df, class_to_info):
     # fig_roc_curve.update_yaxes(type="log", range=[np.log(0.001), np.log(1.1)])
     fig_pr_curve.update_yaxes(range=[0.45, 1.1])
 
-    return fig_roc_curve, fig_pr_curve
+    curve_dict['roc']['figure'] = fig_roc_curve
+    curve_dict['pr']['figure'] = fig_pr_curve
+    return curve_dict
