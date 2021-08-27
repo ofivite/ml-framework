@@ -23,4 +23,4 @@ misc_features: # will be added to output file along with prediction branches
 # output path & names
 # will also log the files to corresponding mlflow run
 output_path: 'data/${year}/multi/pred'
-output_filename_template: '{sample_name}_${year}_pred.csv'
+output_filename_template: '{sample_name}.csv'

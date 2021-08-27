@@ -68,7 +68,7 @@ def main(cfg: DictConfig) -> None:
                 df_pred = pd.DataFrame(pred_dict)
                 df_pred.to_csv(f'{output_path}/{output_filename}', index=False)
                 mlflow.log_artifact(f'{output_path}/{output_filename}', artifact_path='pred')
-                del(df_pred); gc.collect()
+                del(df_pred); os.remove(f'{output_path}/{output_filename}'); gc.collect()
             else:
                 raise Exception(f'Unknown kind for prediction: {cfg.kind}')
         print()
