@@ -1,5 +1,9 @@
 kind: 'for_datacards'
 
+# model & scaling pipe to make predictions
+mlflow_experimentID: ???
+mlflow_runID: ???
+
 # input path & info
 year: 2018
 input_path: 'data/${year}/multi/skims'
@@ -19,10 +23,6 @@ sample_names:
     - ZHToUncorrTauTau
 misc_features: # will be added to output ROOT file along with prediction branches
     - evt
-
-# model & scaling pipe to make predictions
-mlflow_experimentID: ???
-mlflow_runID: ???
 
 # output path & names
 output_path: 'data/${year}/multi/pred'

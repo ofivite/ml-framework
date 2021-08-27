@@ -71,6 +71,7 @@ def main(cfg: DictConfig) -> None:
                 del(df_pred); gc.collect()
             else:
                 raise Exception(f'Unknown kind for prediction: {cfg.kind}')
-
+        print()
+        
 if __name__ == '__main__':
     main()

@@ -98,19 +98,23 @@ def main(cfg: DictConfig) -> None:
         with open(to_absolute_path(cfg.input_pipe_file), 'rb') as f:
             input_pipe = pickle.load(f)
 
-    # derive training weights
+    # derive training weights as of CP analysis (based on the whole input data)
     if cfg.for_training:
-        w_class_imbalance_map, class_weight_map = {}, {}
+        class_weight_map = {}
         for class_label in set(data[_target]):
-            w_class_imbalance_map[class_label] = len(data)/len(data.query(f'{_target}=={class_label}'))
             class_weight_map[class_label] = np.sum(data['weight'])/np.sum(data.query(f'{_target} == {class_label}')['weight'])
 
     # loop over output nodes and store each into a fold file
     print('\n--> Storing to output files...')
     for output_sample_name, output_sample in zip(output_sample_names, output_samples):
         print(f'    {output_sample_name}')
-        # add training weights accounting for imbalance in data
+        # derive class imbalance weights (per output node: train/test)
         if cfg.for_training:
+            w_class_imbalance_map = {}
+            for class_label in set(output_sample[_target]):
+                w_class_imbalance_map[class_label] = len(output_sample)/len(output_sample.query(f'{_target}=={class_label}'))
+
+            # add training weights accounting for imbalance in data
             output_sample['w_class_imbalance'] = output_sample[_target].map(w_class_imbalance_map)
             output_sample['class_weight'] = output_sample[_target].map(class_weight_map)
             output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']

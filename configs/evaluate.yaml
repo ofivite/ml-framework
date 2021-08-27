@@ -1,6 +1,6 @@
 mlflow_experimentID: ???
 mlflow_runID: ???
-dataset: ???
+dataset: ??? # name without csv extension
 
 # plotting styles
 class_to_info:
