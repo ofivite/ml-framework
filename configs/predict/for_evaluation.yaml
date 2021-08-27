@@ -1,20 +1,26 @@
 kind: 'for_evaluation'
 
+# model & scaling pipe to make predictions
+mlflow_experimentID: ???
+mlflow_runID: ???
+
 # input path & info
 year: 2018
-input_path: 'data/{year}/multi/skims'
+input_path: 'data/${year}/multi/skims'
 input_filename_template: '{sample_name}.hdf5'
 sample_names:
     - train
     - test
 
-misc_features: # will be added to output ROOT file along with prediction branches
+misc_features: # will be added to output file along with prediction branches
     - evt
-
-# model & scaling pipe to make predictions
-mlflow_experimentID: 1
-mlflow_runID: 13e050761d8f40b69e2379b1c04da6ba
+    - gen_target
+    - weight
+    - class_weight
+    - w_cp
+    - w_class_imbalance
 
 # output path & names
-output_path: 'data/{year}/multi/pred'
-output_filename_template: '{sample_name}_{year}_pred.csv'
+# will also log the files to corresponding mlflow run
+output_path: 'data/${year}/multi/pred'
+output_filename_template: '{sample_name}.csv'

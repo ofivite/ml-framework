@@ -16,8 +16,8 @@ from utils.inference import load_models, predict_folds
 @hydra.main(config_path="configs/predict")
 def main(cfg: DictConfig) -> None:
     # fill placeholders in the cfg parameters
-    input_path = to_absolute_path(fill_placeholders(cfg.input_path, {'{year}': cfg.year}))
-    output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
+    input_path = to_absolute_path(cfg.input_path)
+    output_path = to_absolute_path(cfg.output_path)
     os.makedirs(output_path, exist_ok=True)
 
     run_folder = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/')
@@ -34,25 +34,29 @@ def main(cfg: DictConfig) -> None:
     fold_id_column = 'fold_id'
 
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
-    with mlflow.start_run(run_id=cfg.mlflow_runID):
+    with mlflow.start_run(experiment_id=cfg.mlflow_experimentID, run_id=cfg.mlflow_runID):
         # loop over input fold files
         for sample_name in cfg.sample_names:
             print(f'\n--> Predicting {sample_name}')
             print(f"        loading data set")
-            input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+            input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name})
 
             # extract DataFrame from fold file
             fy = FoldYielder(f'{input_path}/{input_filename}')
             df = fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
             for f in misc_features: # add misc features
-                df[f] = fy.get_column(f)
+                if f not in df.columns:
+                    if f in fy.columns():
+                        df[f] = fy.get_column(f)
+                    else:
+                        raise KeyError(f'Couldn\'t find {f} neither in DataFrame nor in FoldYielder columns')
             df[fold_id_column] = (df[xtrain_split_feature] % n_splits).astype('int32')
 
             # run cross-inference for folds
             pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models)
 
             print(f"        storing to output file")
-            output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+            output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name})
             if os.path.exists(f'{output_path}/{output_filename}'):
                 os.system(f'rm {output_path}/{output_filename}')
             if cfg.kind == 'for_datacards':
@@ -62,11 +66,12 @@ def main(cfg: DictConfig) -> None:
                 del(df, R_df); gc.collect()
             elif cfg.kind == 'for_evaluation':
                 df_pred = pd.DataFrame(pred_dict)
-                df_pred.to_csv(f'{output_path}/{output_filename}')
+                df_pred.to_csv(f'{output_path}/{output_filename}', index=False)
                 mlflow.log_artifact(f'{output_path}/{output_filename}', artifact_path='pred')
-                del(df_pred); gc.collect()
+                del(df_pred); os.remove(f'{output_path}/{output_filename}'); gc.collect()
             else:
                 raise Exception(f'Unknown kind for prediction: {cfg.kind}')
-
+        print()
+        
 if __name__ == '__main__':
     main()

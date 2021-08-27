@@ -26,3 +26,5 @@ dependencies:
   - pip:
     - lumin=0.7
     - hydra-core=1.1
+    - wandb=0.12
+    - kaleido

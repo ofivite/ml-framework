@@ -14,13 +14,11 @@ import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
 
-from utils.processing import fill_placeholders
-
 @hydra.main(config_path="configs", config_name="train")
 def main(cfg: DictConfig) -> None:
     # load training data into DataFrame + add necessary columns
     print('\n--> Loading training data')
-    train_file = fill_placeholders(to_absolute_path(cfg.train_file), {'{year}': cfg.year})
+    train_file = to_absolute_path(cfg.train_file)
     train_fy = FoldYielder(train_file)
     train_df = train_fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
     train_df['w_cp'] = train_fy.get_column('w_cp')

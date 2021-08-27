@@ -1,4 +1,5 @@
 from glob import glob
+from collections import defaultdict
 import numpy as np
 from sklearn.model_selection import LeaveOneGroupOut
 from mlflow.pyfunc import load_model
@@ -25,16 +26,12 @@ def load_models(run_folder):
     return models, n_splits, xtrain_split_feature
 
 def predict_folds(df, train_features, misc_features, fold_id_column, models):
-    # init structure to be written into output file
-    pred_dict = {
-                 'pred_class': [],
-                 'pred_class_proba': [],
-                 **{misc_feature: [] for misc_feature in misc_features}
-                 }
     if (n_groups:=len(set(df[fold_id_column]))) != (n_splits:=len(models)):
         raise Exception(f'Number of fold groups in the input DataFrame ({n_groups}) \
                                     is not equal to the number of splits infered from the number of models ({n_splits}).')
     if n_splits > 1: # perform cross-inference
+        # init structure to be written into output file
+        pred_dict = defaultdict(list)
         splitter = LeaveOneGroupOut()
         idx_yielder = splitter.split(df, groups=df[fold_id_column])
         # split into folds and get predictions for each with corresponding model
@@ -48,6 +45,7 @@ def predict_folds(df, train_features, misc_features, fold_id_column, models):
             # make predictions
             print(f"        predicting fold {i_fold}")
             y_proba = models[i_fold].predict(df_fold[train_features])
+            [pred_dict[f'pred_class_{i}_proba'].append(y_proba[:,i]) for i in range(y_proba.shape[-1])]
             pred_dict['pred_class'].append(np.argmax(y_proba, axis=-1).astype(np.int32))
             pred_dict['pred_class_proba'].append(np.max(y_proba, axis=-1).astype(np.float32))
             [pred_dict[f].append(df_fold[f].to_numpy()) for f in misc_features]
@@ -56,7 +54,10 @@ def predict_folds(df, train_features, misc_features, fold_id_column, models):
         pred_dict = {k: np.concatenate(v) for k,v in pred_dict.items()}
 
     elif n_splits == 1: # simply make predictions for a given dataframe
+        pred_dict = {}
         y_proba = models[0].predict(df[train_features])
+        for i in range(y_proba.shape[-1]):
+            pred_dict[f'pred_class_{i}_proba'] = y_proba[:,i]
         pred_dict['pred_class'] = np.argmax(y_proba, axis=-1).astype(np.int32)
         pred_dict['pred_class_proba'] = np.max(y_proba, axis=-1).astype(np.float32)
         for f in misc_features:

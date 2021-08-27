@@ -25,8 +25,7 @@ def main(cfg: DictConfig) -> None:
     cat_features = OmegaConf.to_object(cfg.cat_features)
     misc_features = OmegaConf.to_object(cfg.misc_features)
     input_branches = OmegaConf.to_object(cfg.input_branches)
-    input_path = fill_placeholders(cfg.input_path, {'{year}': cfg.year})
-    output_path = to_absolute_path(fill_placeholders(cfg.output_path, {'{year}': cfg.year}))
+    output_path = to_absolute_path(cfg.output_path)
     os.makedirs(output_path, exist_ok=True)
 
     # combine all input data nodes into a single pandas dataframe
@@ -39,9 +38,9 @@ def main(cfg: DictConfig) -> None:
         else:
             assert type(sample)==str
             sample_name = sample
-        input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name, '{year}': cfg.year})
+        input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name})
         print(f'\n--> Opening {sample_name}...')
-        with uproot.open(f'{input_path}/{input_filename}') as f:
+        with uproot.open(f'{cfg.input_path}/{input_filename}') as f:
             if cfg.for_training:
                 processes = list(sample.values())[0]
                 for process_name, process_cfg in processes.items():
@@ -93,25 +92,29 @@ def main(cfg: DictConfig) -> None:
         outputs = {name: group for name, group in data.groupby('group_name')}
         output_samples = outputs.values()
         output_sample_names = outputs.keys()
-        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n, '{year}': cfg.year}) for n in output_sample_names]
+        output_sample_names = [fill_placeholders(cfg.output_filename_template, {'{sample_name}': n}) for n in output_sample_names]
 
         # fetch already fitted pipe
         with open(to_absolute_path(cfg.input_pipe_file), 'rb') as f:
             input_pipe = pickle.load(f)
 
-    # derive training weights
+    # derive training weights as of CP analysis (based on the whole input data)
     if cfg.for_training:
-        w_class_imbalance_map, class_weight_map = {}, {}
+        class_weight_map = {}
         for class_label in set(data[_target]):
-            w_class_imbalance_map[class_label] = len(data)/len(data.query(f'{_target}=={class_label}'))
             class_weight_map[class_label] = np.sum(data['weight'])/np.sum(data.query(f'{_target} == {class_label}')['weight'])
 
     # loop over output nodes and store each into a fold file
     print('\n--> Storing to output files...')
     for output_sample_name, output_sample in zip(output_sample_names, output_samples):
         print(f'    {output_sample_name}')
-        # add training weights accounting for imbalance in data
+        # derive class imbalance weights (per output node: train/test)
         if cfg.for_training:
+            w_class_imbalance_map = {}
+            for class_label in set(output_sample[_target]):
+                w_class_imbalance_map[class_label] = len(output_sample)/len(output_sample.query(f'{_target}=={class_label}'))
+
+            # add training weights accounting for imbalance in data
             output_sample['w_class_imbalance'] = output_sample[_target].map(w_class_imbalance_map)
             output_sample['class_weight'] = output_sample[_target].map(class_weight_map)
             output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
@@ -121,7 +124,7 @@ def main(cfg: DictConfig) -> None:
 
         # store into a hdf5 fold file
         df2foldfile(df=output_sample,
-                    n_folds=cfg.n_folds, strat_key=strat_key,
+                    n_folds=cfg.n_lumin_folds, strat_key=strat_key,
                     cont_feats=cont_features,
                     cat_feats=cat_features, cat_maps=cat_maps,
                     targ_feats=_target, targ_type='int',
