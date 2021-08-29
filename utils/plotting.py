@@ -18,7 +18,7 @@ def plot_class_score(df, class_id, class_to_info, how='density', weight=None):
         class_colors = [f'rgba({class_to_info[i].color}, 1.)' if i==class_id # emphasize category class by increase in transparency
                                                               else f'rgba({class_to_info[i].color}, .2)'
                                                               for i in class_to_info]
-        fig = ff.create_distplot(hist_data, class_labels, bin_size=5e-3, histnorm='probability', show_curve=True, show_rug=False, colors=class_colors)
+        fig = ff.create_distplot(hist_data, class_labels, bin_size=class_to_info[class_id].bin_size, histnorm='probability', show_curve=True, show_rug=False, colors=class_colors)
         fig.update_layout(
             xaxis_title='model score',
             yaxis_title='a.u.',
