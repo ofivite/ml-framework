@@ -76,10 +76,12 @@ def main(cfg: DictConfig) -> None:
             # construct lightgbm dataset
             train_data = lgb.Dataset(train_fold_df[train_features],
                                      label=train_fold_df[target_name],
-                                     weight=train_fold_df[weight_name])
+                                     weight=train_fold_df[weight_name],
+                                     categorical_feature=cfg.cat_features)
             validation_data = lgb.Dataset(validation_fold_df[train_features],
                                           label=validation_fold_df[target_name],
                                           weight=validation_fold_df[weight_name],
+                                          categorical_feature=cfg.cat_features,
                                           reference=train_data)
 
             # train booster
