@@ -1,0 +1,4 @@
+# train/test splitter & scaler
+train_size: 0.9
+norm: True
+pca: False

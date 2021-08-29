@@ -1,0 +1,38 @@
+input_branches: # will be loaded from input ROOT files
+  - pt_1
+  - pt_2
+  - jpt_1
+  - jpt_2
+  - dijetpt
+  - jdeta
+  - m_sv
+  - mjj
+  - m_vis
+  - puppimt_1
+  - pt_tt
+  - puppimet
+  - njets
+  - evt
+  - weight
+  
+cont_features: # will be stored in the output foldfile as continuous features
+  - pt_1
+  - pt_2
+  - jpt_1
+  - jpt_2
+  - dijetpt
+  - jdeta
+  - m_sv
+  - mjj
+  - m_vis
+  - puppimt_1
+  - pt_tt
+  - puppimet
+cat_features: # will be stored in the output foldfile as categorical features
+  - njets
+misc_features: # will be stored in the output foldfile as miscellaneous features
+  - evt
+  - weight
+  - w_class_imbalance # see definition in preprocess.py
+  - w_cp
+  - class_weight
