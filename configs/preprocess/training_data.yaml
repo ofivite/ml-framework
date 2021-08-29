@@ -1,4 +1,5 @@
 for_training: True
+compute_w_CP: True
 defaults:
   - for_training/inputs@_global_: cp_htt
   - for_training/params@_global_: cp_htt

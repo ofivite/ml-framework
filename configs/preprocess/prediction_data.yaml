@@ -1,4 +1,5 @@
 for_training: False
+compute_w_CP: False
 defaults:
   - for_prediction/inputs@_global_: cp_htt
   - for_prediction/outputs@_global_: cp_htt
