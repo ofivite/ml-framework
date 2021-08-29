@@ -15,7 +15,7 @@ import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
 
-@hydra.main(config_path="configs", config_name="train")
+@hydra.main(config_path="configs/train", config_name="train")
 def main(cfg: DictConfig) -> None:
     # load training data into DataFrame + add necessary columns
     print('\n--> Loading training data')
