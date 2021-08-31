@@ -129,7 +129,7 @@ The second option `for_evaluation` is implemented in order to run the next step 
 python predict.py --config-name for_evaluation.yaml year=2018 mlflow_experimentID=None mlflow_runID=None # insert the corresponding experiment/run ID here
 ```
 
-Here, for a given input files (from `input_path`, as always preprocessed with `preprocess.py`) and a given training (from `mlflow_runID`) predictions will be logged into `.csv` files under exactly the same `mlflow_runID`. After that, simply referring to a single `mlflow_runID`, predictions will be fetched automatically from `mlflow` logs and a dashboard with various metrics and plots can be produced with `evaluate.py` script (WIP).
+Here, for a given input files (from `input_path`, as always preprocessed with `preprocess.py`) and a given training (from `mlflow_runID`) predictions will be logged into `.csv` files under exactly the same `mlflow_runID`. After that, simply referring to a single `mlflow_runID`, predictions will be fetched automatically from `mlflow` logs and a dashboard with various metrics and plots can be produced with `evaluate.py` script.
 
 ## Evaluating results
 
