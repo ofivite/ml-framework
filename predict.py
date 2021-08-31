@@ -17,9 +17,6 @@ from utils.inference import load_models, predict_folds
 def main(cfg: DictConfig) -> None:
     # fill placeholders in the cfg parameters
     input_path = to_absolute_path(cfg.input_path)
-    output_path = to_absolute_path(cfg.output_path)
-    os.makedirs(output_path, exist_ok=True)
-
     run_folder = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/')
     models, n_splits, xtrain_split_feature = load_models(run_folder)
 
@@ -57,18 +54,21 @@ def main(cfg: DictConfig) -> None:
 
             print(f"        storing to output file")
             output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name})
-            if os.path.exists(f'{output_path}/{output_filename}'):
-                os.system(f'rm {output_path}/{output_filename}')
             if cfg.kind == 'for_datacards':
+                output_path = to_absolute_path(cfg.output_path)
+                os.makedirs(output_path, exist_ok=True)
+                if os.path.exists(f'{output_path}/{output_filename}'):
+                    os.system(f'rm {output_path}/{output_filename}')
+                
                 # store predictions in RDataFrame and snapshot it into output ROOT file
                 R_df = R.RDF.MakeNumpyDataFrame(pred_dict)
                 R_df.Snapshot(cfg.output_tree_name, f'{output_path}/{output_filename}')
                 del(df, R_df); gc.collect()
             elif cfg.kind == 'for_evaluation':
                 df_pred = pd.DataFrame(pred_dict)
-                df_pred.to_csv(f'{output_path}/{output_filename}', index=False)
-                mlflow.log_artifact(f'{output_path}/{output_filename}', artifact_path='pred')
-                del(df_pred); os.remove(f'{output_path}/{output_filename}'); gc.collect()
+                df_pred.to_csv(output_filename, index=False)
+                mlflow.log_artifact(output_filename, artifact_path='pred')
+                del(df_pred); os.remove(output_filename); gc.collect()
             else:
                 raise Exception(f'Unknown kind for prediction: {cfg.kind}')
         print()

@@ -5,8 +5,8 @@ mlflow_experimentID: ???
 mlflow_runID: ???
 
 # input path & info
-year: 2018
-input_path: 'data/${year}/multi/skims'
+year: ???
+input_path: 'data/cp_htt/${year}/skims'
 input_filename_template: '{sample_name}.hdf5'
 sample_names:
     - Diboson
@@ -25,6 +25,6 @@ misc_features: # will be added to output ROOT file along with prediction branche
     - evt
 
 # output path & names
-output_path: 'data/${year}/multi/pred'
+output_path: 'data/cpt_htt/${year}/pred'
 output_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_${year}_pred.root'
 output_tree_name: TauCheck
