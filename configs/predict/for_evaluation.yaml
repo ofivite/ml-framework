@@ -6,7 +6,7 @@ mlflow_runID: ???
 
 # input path & info
 year: ???
-input_path: 'data/cpt_htt/${year}/skims'
+input_path: 'data/cp_htt/${year}/skims'
 input_filename_template: '{sample_name}.hdf5'
 sample_names:
     - train

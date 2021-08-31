@@ -25,6 +25,6 @@ misc_features: # will be added to output ROOT file along with prediction branche
     - evt
 
 # output path & names
-output_path: 'data/cpt_htt/${year}/pred'
+output_path: 'data/cp_htt/${year}/pred'
 output_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_${year}_pred.root'
 output_tree_name: TauCheck
