@@ -1,10 +1,34 @@
 for_training: False
 compute_w_CP: False
 defaults:
-  - for_prediction/inputs@_global_: cp_htt
-  - for_prediction/outputs@_global_: cp_htt
-  - for_training/features@_global_: cp_htt
+  - features
+  - _self_
 
 # override values
 misc_features: # will be stored in the output foldfile as miscellaneous features
   - evt
+
+# input section
+year: ???
+input_path: /nfs/dust/cms/user/rasp/storage/cardinia/${year}/InputDNNmt_June9-PAS # should be absolute path
+input_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_${year}.root' # assume the same pattern for all input sample files
+input_tree_name: TauCheck
+input_samples:
+    - Diboson
+    - DYJets
+    - EmbeddedMuTau
+    - EWKZ
+    - GluGluHToUncorrTauTau
+    - HToWW
+    - SingleMuon
+    - TTbar
+    - VBFHToUncorrTauTau
+    - WHToUncorrTauTau
+    - WJets
+    - ZHToUncorrTauTau
+input_pipe_file: 'data/cp_htt/${year}/skims/input_pipe.pkl' # relative path
+
+# output section
+output_path:  data/cp_htt/${year}/skims # relative path
+output_filename_template: '{sample_name}' # {sample_name} here will be filled with names from "input_samples" above
+n_lumin_folds: 10 # will split output sample into these number of folds before saving to hdf5 file

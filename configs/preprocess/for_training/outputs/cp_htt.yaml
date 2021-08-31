@@ -1,7 +1,0 @@
-output_path: data/${year}/multi/skims # relative path
-output_filename_template: '{sample_name}'
-output_samples:
-  - train
-  - test
-pipe_name: 'input_pipe' # filename for saving the feature scaling pipe
-n_lumin_folds: 10 # will split output sample into these number of folds before saving to hdf5 file
