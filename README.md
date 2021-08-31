@@ -130,3 +130,17 @@ python predict.py --config-name for_evaluation.yaml year=2018 mlflow_experimentI
 ```
 
 Here, for a given input files (from `input_path`, as always preprocessed with `preprocess.py`) and a given training (from `mlflow_runID`) predictions will be logged into `.csv` files under exactly the same `mlflow_runID`. After that, simply referring to a single `mlflow_runID`, predictions will be fetched automatically from `mlflow` logs and a dashboard with various metrics and plots can be produced with `evaluate.py` script (WIP).
+
+## Evaluating results
+
+Given the trained model and corresponding predictions for train and test skims (produced with `for_evaluation`), one can be interested in evaluating the model's performance on these data sets. For that purpose, there is a dedicated `evaluate.py` script which is configured with a corresponding `configs/evaluate.yaml` cfg file. Basically, one needs to simply specify there usual `mlflow_experimentID`/`mlflow_runID` and the name of the `dataset` to be used for estimation ("train"/"test"). The latter will be fetched from corresponding `mlflow` run folder. That is, executing the following command:
+
+```bash
+python evaluate.py mlflow_experimentID=None mlflow_runID=None dataset=None # insert the values here
+```
+
+will compute, plot and finally log all the plots (both interactive `plotly` html and pdf files) and metrics under the corresponding `mlflow_runID`. Currently, these include plots of model's output distribution for true classes in each predicted category (as probability density), confusion matrix (weighted with class weights, normalised by true and predicted values), ROC and precision-recall (PR) curves (weighted with one-vs-all class weights). Corresponding plotting functions are defined in `utils/plotting.py`. 
+
+After that, one will be able to inspect and compare them across various runs using `mlflow` UI (see Tracking section above). To do that, please click on the run of interest (under the column `Start Time`) in the main table with all runs and scroll down to a section `Artifacts` and head over to `plots` folder. 
+
+Furthermore, in the `Metrics` section metric values, also computed inside of `evaluate.py` should appear. At the moment this includes area under ROC curve for each class (`roc_auc_*`), [average precision](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html) (`pr_average_prec_*`) and confusion matrix elements (`cm`), all of them separately for train and test samples.
