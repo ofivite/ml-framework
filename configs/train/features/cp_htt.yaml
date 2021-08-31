@@ -1,0 +1,19 @@
+# features to be used for training
+cont_features:
+  - pt_1
+  - pt_2
+  - jpt_1
+  - jpt_2
+  - dijetpt
+  - jdeta
+  - m_sv
+  - mjj
+  - m_vis
+  - puppimt_1
+  - pt_tt
+  - puppimet
+cat_features:
+  - njets
+
+# training weight
+weight_name: 'w_cp'

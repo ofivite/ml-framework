@@ -99,7 +99,7 @@ def main(cfg: DictConfig) -> None:
             input_pipe = pickle.load(f)
 
     # derive training weights as of CP analysis (based on the whole input data)
-    if cfg.for_training:
+    if cfg.for_training and cfg.compute_w_CP:
         class_weight_map = {}
         for class_label in set(data[_target]):
             class_weight_map[class_label] = np.sum(data['weight'])/np.sum(data.query(f'{_target} == {class_label}')['weight'])
@@ -116,8 +116,9 @@ def main(cfg: DictConfig) -> None:
 
             # add training weights accounting for imbalance in data
             output_sample['w_class_imbalance'] = output_sample[_target].map(w_class_imbalance_map)
-            output_sample['class_weight'] = output_sample[_target].map(class_weight_map)
-            output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
+            if cfg.compute_w_CP:
+                output_sample['class_weight'] = output_sample[_target].map(class_weight_map)
+                output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
 
         # apply normalisation
         output_sample[cont_features] = input_pipe.transform(output_sample[cont_features])
