@@ -1,6 +1,7 @@
 defaults:
   - model@_global_: cp_htt
   - features@_global_: cp_htt
+  - _self_
 
 # path to the train/test data & scaling pipe
 year: ???
