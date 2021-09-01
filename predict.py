@@ -6,6 +6,7 @@ from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
 
 import ROOT as R
+import uproot
 from lumin.nn.data.fold_yielder import FoldYielder
 import pandas as pd
 import mlflow
@@ -60,6 +61,18 @@ def main(cfg: DictConfig) -> None:
                 if os.path.exists(f'{output_path}/{output_filename}'):
                     os.system(f'rm {output_path}/{output_filename}')
                 
+                # extract original index
+                orig_filename = fill_placeholders(to_absolute_path(f'{cfg.orig_path}/{cfg.orig_filename_template}'), {'{sample_name}': sample_name})
+                with uproot.open(orig_filename) as f:
+                    t = f['TauCheck']
+                    orig_index = t.arrays(['evt', 'run'], library='pd')
+                    orig_index = list(map(tuple, orig_index.values))
+                
+                # reorder entries to match original indices
+                df_pred = pd.DataFrame(pred_dict).set_index(['evt', 'run'])
+                df_pred = df_pred.loc[orig_index].reset_index()
+                pred_dict = {c: df_pred[c].values for c in df_pred.columns}
+
                 # store predictions in RDataFrame and snapshot it into output ROOT file
                 R_df = R.RDF.MakeNumpyDataFrame(pred_dict)
                 R_df.Snapshot(cfg.output_tree_name, f'{output_path}/{output_filename}')

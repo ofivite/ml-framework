@@ -12,6 +12,8 @@ model_param:
   bagging_freq: 5
   bagging_seed: 1357
   feature_fraction: 0.8
+  lambda_l1: 0
+  feature_fraction_bynode: 1
   num_threads: 4
   verbosity: 1
   seed: 1357

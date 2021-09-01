@@ -6,6 +6,8 @@ mlflow_runID: ???
 
 # input path & info
 year: ???
+orig_path: /nfs/dust/cms/user/rasp/storage/cardinia/${year}/InputDNNmt_June9-PAS
+orig_filename_template: mt-NOMINAL_ntuple_{sample_name}_${year}.root
 input_path: 'data/cp_htt/${year}/skims'
 input_filename_template: '{sample_name}.hdf5'
 sample_names:
@@ -23,6 +25,7 @@ sample_names:
     - ZHToUncorrTauTau
 misc_features: # will be added to output ROOT file along with prediction branches
     - evt
+    - run
 
 # output path & names
 output_path: 'data/cp_htt/${year}/pred'
