@@ -1,3 +1,6 @@
+defaults:
+  - ../preprocess@_global_.preprocess_cfg: prediction_data
+
 kind: 'for_datacards'
 
 # model & scaling pipe to make predictions
@@ -6,26 +9,11 @@ run_id: ???
 
 # input path & info
 year: ???
-orig_path: /nfs/dust/cms/user/rasp/storage/cardinia/${year}/InputDNNmt_June9-PAS
-orig_filename_template: mt-NOMINAL_ntuple_{sample_name}_${year}.root
+orig_path: ${preprocess_cfg.input_path}
+orig_filename_template: ${preprocess_cfg.input_filename_template}
 input_path: 'data/cp_htt/${year}/skims'
 input_filename_template: '{sample_name}.hdf5'
-sample_names:
-    - Diboson
-    - DYJets
-    - EmbeddedMuTau
-    - EWKZ
-    - GluGluHToUncorrTauTau
-    - HToWW
-    - SingleMuon
-    - TTbar
-    - VBFHToUncorrTauTau
-    - WHToUncorrTauTau
-    - WJets
-    - ZHToUncorrTauTau
-misc_features: # will be added to output ROOT file along with prediction branches
-    - evt
-    - run
+sample_names: ${preprocess_cfg.input_samples}
 
 # output section
 misc_features: # will be added to output ROOT file along with prediction branches
