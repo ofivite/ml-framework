@@ -104,12 +104,12 @@ Then one can access `mlflow` UI locally by going to http://localhost:5010 in a b
 ## Making predictions
 Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (skimmed by `preprocess.py`). This is performed with `predict.py` script which loads the model(s) with `mlflow` given the corresponding `experiment_ID` and `run_ID`, opens each of the input fold files with `FoldYielder` and passes the data to the model(s). 
 
-Prediction workflow is also implemented to be in N-fold fashion, which should be transparent to the user similarly to the training step. The number of splits is infered from `mlflow` logs for the corresponding run ID, so that the strategy of the prediction split is automatically adapted to the strategy of the training split. That is, conceptually only `mlflow_experimentID`/`mlflow_runID` and path to input data is needed to produce predictions and store them to the output files. Variables stored are (see `utils/inference.py` for details) `pred_class_{i}_proba` (predicted probability of i-th class), `pred_class` (argmax of output nodes), `pred_class_proba` (probability of `pred_class`) and additionally `misc_features` as those specified in the cfg file.     
+Prediction workflow is also implemented to be in N-fold fashion, which should be transparent to the user similarly to the training step. The number of splits is infered from `mlflow` logs for the corresponding run ID, so that the strategy of the prediction split is automatically adapted to the strategy of the training split. That is, conceptually only `experiment_id`/`run_id` and path to input data is needed to produce predictions and store them to the output files. Variables stored are (see `utils/inference.py` for details) `pred_class_{i}_proba` (predicted probability of i-th class), `pred_class` (argmax of output nodes), `pred_class_proba` (probability of `pred_class`) and additionally `misc_features` as those specified in the cfg file.     
 
 There are two possible outputs (each configured with its own cfg file) which can be created at the prediction step. One is of the kind `for_datacards` and the other is `for_evaluation`. For both of them the predictions are produced in the same way, but they are saved to different file formats. For example, in case of option `for_datacards`:
 
 ```bash
-python predict.py --config-name for_datacards.yaml year=2018 mlflow_experimentID=None mlflow_runID=None # insert the corresponding experiment/run ID here
+python predict.py --config-name for_datacards.yaml year=2018 experiment_id=None run_id=None # insert the corresponding experiment/run ID here
 ```
 
 For a given model from a corresponding mlflow run it will produce in `output_path` ROOT files one per `sample_name` with predictions saved therein to a TTree named `output_tree_name`. To do that, [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class is used to snapshot a python dictionary with prediction arrays into ROOT files. After that they can be used in the next steps of the analysis, e.g. in order to produce datacards. Using [`TTree` friends](https://root.cern.ch/root/htmldoc/guides/users-guide/Trees.html#example-3-adding-friends-to-trees) might be especially helpful in this case to augment the original input ROOT files with predictions added as a new branch (`evt` in the example below is used as a common index):  
@@ -126,20 +126,20 @@ T->Scan("pred_class_proba:evt");
 
 The second option `for_evaluation` is implemented in order to run the next step of estimating the model performance:
 ```bash
-python predict.py --config-name for_evaluation.yaml year=2018 mlflow_experimentID=None mlflow_runID=None # insert the corresponding experiment/run ID here
+python predict.py --config-name for_evaluation.yaml year=2018 experiment_id=None run_id=None # insert the corresponding experiment/run ID here
 ```
 
-Here, for a given input files (from `input_path`, as always preprocessed with `preprocess.py`) and a given training (from `mlflow_runID`) predictions will be logged into `.csv` files under exactly the same `mlflow_runID`. After that, simply referring to a single `mlflow_runID`, predictions will be fetched automatically from `mlflow` logs and a dashboard with various metrics and plots can be produced with `evaluate.py` script.
+Here, for a given input files (from `input_path`, as always preprocessed with `preprocess.py`) and a given training (from `run_id`) predictions will be logged into `.csv` files under exactly the same `run_id`. After that, simply referring to a single `run_id`, predictions will be fetched automatically from `mlflow` logs and a dashboard with various metrics and plots can be produced with `evaluate.py` script.
 
 ## Evaluating results
 
-Given the trained model and corresponding predictions for train and test skims (produced with `for_evaluation`), one can be interested in evaluating the model's performance on these data sets. For that purpose, there is a dedicated `evaluate.py` script which is configured with a corresponding `configs/evaluate.yaml` cfg file. Basically, one needs to simply specify there usual `mlflow_experimentID`/`mlflow_runID` and the name of the `dataset` to be used for estimation ("train"/"test"). The latter will be fetched from corresponding `mlflow` run folder. That is, executing the following command:
+Given the trained model and corresponding predictions for train and test skims (produced with `for_evaluation`), one can be interested in evaluating the model's performance on these data sets. For that purpose, there is a dedicated `evaluate.py` script which is configured with a corresponding `configs/evaluate.yaml` cfg file. Basically, one needs to simply specify there usual `experiment_id`/`run_id` and the name of the `dataset` to be used for estimation ("train"/"test"). The latter will be fetched from corresponding `mlflow` run folder. That is, executing the following command:
 
 ```bash
-python evaluate.py mlflow_experimentID=None mlflow_runID=None dataset=None # insert the values here
+python evaluate.py experiment_id=None run_id=None dataset=None # insert the values here
 ```
 
-will compute, plot and finally log all the plots (both interactive `plotly` html and pdf files) and metrics under the corresponding `mlflow_runID`. Currently, these include plots of model's output distribution for true classes in each predicted category (as probability density), confusion matrix (weighted with class weights, normalised by true and predicted values), ROC and precision-recall (PR) curves (weighted with one-vs-all class weights). Corresponding plotting functions are defined in `utils/plotting.py`. 
+will compute, plot and finally log all the plots (both interactive `plotly` html and pdf files) and metrics under the corresponding `run_id`. Currently, these include plots of model's output distribution for true classes in each predicted category (as probability density), confusion matrix (weighted with class weights, normalised by true and predicted values), ROC and precision-recall (PR) curves (weighted with one-vs-all class weights). Corresponding plotting functions are defined in `utils/plotting.py`. 
 
 After that, one will be able to inspect and compare them across various runs using `mlflow` UI (see Tracking section above). To do that, please click on the run of interest (under the column `Start Time`) in the main table with all runs and scroll down to a section `Artifacts` and head over to `plots` folder. 
 

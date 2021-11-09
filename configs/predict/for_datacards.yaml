@@ -1,8 +1,8 @@
 kind: 'for_datacards'
 
 # model & scaling pipe to make predictions
-mlflow_experimentID: ???
-mlflow_runID: ???
+experiment_id: ???
+run_id: ???
 
 # input path & info
 year: ???

@@ -18,7 +18,7 @@ from utils.inference import load_models, predict_folds
 def main(cfg: DictConfig) -> None:
     # fill placeholders in the cfg parameters
     input_path = to_absolute_path(cfg.input_path)
-    run_folder = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/')
+    run_folder = to_absolute_path(f'mlruns/{cfg.experiment_id}/{cfg.run_id}/')
     models, n_splits, xtrain_split_feature = load_models(run_folder)
 
     # extract names of training features from mlflow-stored model
@@ -32,7 +32,7 @@ def main(cfg: DictConfig) -> None:
     fold_id_column = 'fold_id'
 
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
-    with mlflow.start_run(experiment_id=cfg.mlflow_experimentID, run_id=cfg.mlflow_runID):
+    with mlflow.start_run(experiment_id=cfg.experiment_id, run_id=cfg.run_id):
         # loop over input fold files
         for sample_name in cfg.sample_names:
             print(f'\n--> Predicting {sample_name}')

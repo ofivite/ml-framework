@@ -13,7 +13,7 @@ from utils.plotting import plot_class_score, plot_curves
 @hydra.main(config_path="configs", config_name="evaluate")
 def main(cfg: DictConfig) -> None:
     print('\n--> Loading predictions')
-    run_folder = to_absolute_path(f'mlruns/{cfg.mlflow_experimentID}/{cfg.mlflow_runID}/')
+    run_folder = to_absolute_path(f'mlruns/{cfg.experiment_id}/{cfg.run_id}/')
     df_pred = pd.read_csv(f'{run_folder}/artifacts/pred/{cfg.dataset}.csv')
 
     # check that class id match in data and in training cfg
@@ -22,7 +22,7 @@ def main(cfg: DictConfig) -> None:
     class_names = []
 
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
-    with mlflow.start_run(experiment_id=cfg.mlflow_experimentID, run_id=cfg.mlflow_runID):
+    with mlflow.start_run(experiment_id=cfg.experiment_id, run_id=cfg.run_id):
         # plot density scores in each category
         for class_id in cfg.class_to_info:
             class_name = cfg.class_to_info[class_id]['name']
