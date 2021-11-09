@@ -55,12 +55,7 @@ def main(cfg: DictConfig) -> None:
 
             print(f"        storing to output file")
             output_filename = fill_placeholders(cfg.output_filename_template, {'{sample_name}': sample_name})
-            if cfg.kind == 'for_datacards':
-                output_path = to_absolute_path(cfg.output_path)
-                os.makedirs(output_path, exist_ok=True)
-                if os.path.exists(f'{output_path}/{output_filename}'):
-                    os.system(f'rm {output_path}/{output_filename}')
-                
+            if cfg.kind == 'for_datacards':                
                 # extract original index
                 orig_filename = fill_placeholders(to_absolute_path(f'{cfg.orig_path}/{cfg.orig_filename_template}'), {'{sample_name}': sample_name})
                 with uproot.open(orig_filename) as f:
@@ -75,8 +70,9 @@ def main(cfg: DictConfig) -> None:
 
                 # store predictions in RDataFrame and snapshot it into output ROOT file
                 R_df = R.RDF.MakeNumpyDataFrame(pred_dict)
-                R_df.Snapshot(cfg.output_tree_name, f'{output_path}/{output_filename}')
-                del(df, R_df); gc.collect()
+                R_df.Snapshot(cfg.output_tree_name, output_filename)
+                mlflow.log_artifact(output_filename, artifact_path='pred')
+                del(df, R_df); os.remove(output_filename); gc.collect()
             elif cfg.kind == 'for_evaluation':
                 df_pred = pd.DataFrame(pred_dict)
                 df_pred.to_csv(output_filename, index=False)

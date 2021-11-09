@@ -12,6 +12,7 @@ sample_names:
     - train
     - test
 
+# output section
 misc_features: # will be added to output file along with prediction branches
     - evt
     - gen_target
@@ -19,6 +20,4 @@ misc_features: # will be added to output file along with prediction branches
     - class_weight
     - w_cp
     - w_class_imbalance
-
-# output section
 output_filename_template: '{sample_name}.csv' # will log the files to corresponding mlflow run
