@@ -46,11 +46,15 @@ def main(cfg: DictConfig) -> None:
                 for process_name, process_cfg in processes.items():
                     print(f'    loading {process_name}')
                     data_sample = f[cfg.input_tree_name].arrays(input_branches, cut=process_cfg['cut'], library='pd')
+                    if data_sample.shape[0]==0:
+                        raise RuntimeError(f'DataFrame for process ({process_name}) is empty')
                     data_sample['group_name'] = process_name
                     data_sample[_target] = process_cfg['class']
                     data_samples.append(data_sample)
             else:
                 data_sample = f[cfg.input_tree_name].arrays(input_branches, cut=None, library='pd')
+                if data_sample.shape[0]==0:
+                    raise RuntimeError(f'DataFrame for process ({process_name}) is empty')
                 data_sample['group_name'] = sample_name
                 data_sample[_target] = -1
                 data_samples.append(data_sample)
