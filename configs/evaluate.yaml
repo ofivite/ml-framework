@@ -5,17 +5,22 @@ dataset: ??? # name without csv extension
 # plotting styles & class_id -> class_name mapping
 class_to_info:
   0:
-    name: higgs
+    name: higgs_s
     color: '194, 71, 92' # RGB format
     alpha: 0.6 # color transparency
     bin_size: 1e-2
   1:
-    name: taus
-    color: '90, 90, 90'
+    name: higgs_b
+    color: '163, 145, 113'
     alpha: 0.7
     bin_size: 1e-2
   2:
     name: fakes
     color: '65, 123, 159'
     alpha: .9
+    bin_size: 1e-2
+  3:
+    name: taus
+    color: '90, 90, 90'
+    alpha: 0.7
     bin_size: 1e-2

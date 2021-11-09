@@ -82,7 +82,8 @@ def main(cfg: DictConfig) -> None:
     if cfg.for_training:
         # derive key for stratified split
         strat_key = 'strat_key'
-        data[strat_key] = ids2unique(data[[_target] + cat_features].values)
+        data[strat_key] = ids2unique(data[[_target]].values)
+        # data[strat_key] = ids2unique(data[[_target] + cat_features].values)
 
         # split into output_samples[0] -> train, output_samples[1] -> test
         output_samples = train_test_split(data, train_size=cfg.train_size, stratify=data[strat_key], random_state=1357)

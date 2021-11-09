@@ -6,7 +6,7 @@ run_id: ???
 
 # input path & info
 year: ???
-input_path: 'data/cp_htt/${year}/skims'
+input_path: 'data/bbH/${year}/skims/medium_wp'
 input_filename_template: '{sample_name}.hdf5'
 sample_names:
     - train
@@ -16,8 +16,5 @@ sample_names:
 misc_features: # will be added to output file along with prediction branches
     - evt
     - gen_target
-    - weight
-    - class_weight
-    - w_cp
     - w_class_imbalance
 output_filename_template: '{sample_name}.csv' # will log the files to corresponding mlflow run

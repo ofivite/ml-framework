@@ -11,25 +11,54 @@ misc_features: # will be stored in the output foldfile as miscellaneous features
 
 # input section
 year: ???
-input_path: /nfs/dust/cms/user/rasp/storage/cardinia/${year}/InputDNNmt_June9-PAS # should be absolute path
-input_filename_template: 'mt-NOMINAL_ntuple_{sample_name}_${year}.root' # assume the same pattern for all input sample files
+input_path: /nfs/dust/cms/user/rasp/Run/tautau/Aug21/${year} # should be absolute path
+input_filename_template: '{sample_name}.root' # assume the same pattern for all input sample files
 input_tree_name: TauCheck
 input_samples:
-    - Diboson
-    - DYJets
-    - EmbeddedMuTau
-    - EWKZ
-    - GluGluHToUncorrTauTau
-    - HToWW
-    - SingleMuon
-    - TTbar
-    - VBFHToUncorrTauTau
-    - WHToUncorrTauTau
-    - WJets
-    - ZHToUncorrTauTau
-input_pipe_file: 'data/cp_htt/${year}/skims/input_pipe.pkl' # relative path
+  - DYJetsToLL_M-50
+  - DY1JetsToLL_M-50
+  - DY2JetsToLL_M-50
+  - DY3JetsToLL_M-50
+  - DY4JetsToLL_M-50
+  - EmbeddedTauTau_Run2018A
+  - EmbeddedTauTau_Run2018B
+  - EmbeddedTauTau_Run2018C
+  - EmbeddedTauTau_Run2018D
+  - GluGluHToTauTau_M125
+  - GluGluHToWWTo2L2Nu_M125
+  - HWminusJ_HToWW_M125
+  - HWplusJ_HToWW_M125
+  - ST_t-channel_antitop_4f
+  - ST_t-channel_top_4f
+  - ST_tW_antitop_5f
+  - ST_tW_top_5f
+  - SUSYGluGluToBBHToTauTau_powheg_M125
+  - Tau_Run2018A
+  - Tau_Run2018B
+  - Tau_Run2018C
+  - Tau_Run2018D
+  - TTTo2L2Nu
+  - TTToHadronic
+  - TTToSemiLeptonic
+  - VBFHToTauTau_M125
+  - VBFHToWWTo2L2Nu_M125
+  - VVTo2L2Nu
+  - WJetsToLNu
+  - W1JetsToLNu
+  - W2JetsToLNu
+  - W3JetsToLNu
+  - W4JetsToLNu
+  - WminusHToTauTau_M125
+  - WplusHToTauTau_M125
+  - WZTo2L2Q
+  - WZTo3LNu
+  - ZHJ_HToWW_M125
+  - ZHToTauTau_M125_13TeV
+  - ZZTo2L2Q
+  - ZZTo4L
+input_pipe_file: 'data/bbH/${year}/skims/medium_wp/input_pipe.pkl' # relative path
 
 # output section
-output_path:  data/cp_htt/${year}/skims # relative path
+output_path:  data/bbH/${year}/skims/for_prediction # relative path
 output_filename_template: '{sample_name}' # {sample_name} here will be filled with names from "input_samples" above
 n_lumin_folds: 10 # will split output sample into these number of folds before saving to hdf5 file

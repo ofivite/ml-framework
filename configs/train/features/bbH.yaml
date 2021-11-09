@@ -1,0 +1,20 @@
+# features to be used for training
+cont_features:
+  - pt_1
+  - pt_2
+  - m_sv
+  - m_vis
+  - pt_tt
+  - puppimet
+  - jpt_1
+  - jpt_2
+  - bpt_1
+  - bpt_2
+  - jdeta
+  - mjj
+cat_features:
+  - njets
+  - nbtag
+
+# training weight
+weight_name: 'w_class_imbalance'
