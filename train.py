@@ -53,7 +53,7 @@ def main(cfg: DictConfig) -> None:
         raise ValueError(f'n_splits should be positive integer, got {cfg.n_splits}')
     train_fy.close(); del(train_fy); gc.collect()
 
-    with mlflow.start_run():
+    with mlflow.start_run() as active_run:
         # enable auto logging for mlflow & log some cfg parameters
         mlflow.lightgbm.autolog(log_models=False)
         mlflow.log_params({
@@ -93,6 +93,7 @@ def main(cfg: DictConfig) -> None:
             signature = infer_signature(train_fold_df[train_features], model.predict(train_fold_df[train_features]))
             mlflow.lightgbm.log_model(model, f'model_{i_fold}', signature=signature, input_example=train_fold_df.iloc[0][train_features].to_numpy())
             # mlflow.log_artifact(train_idx)
+            mlflow.log_param('run_id', active_run.info.run_id)
 
 if __name__ == '__main__':
     main()
