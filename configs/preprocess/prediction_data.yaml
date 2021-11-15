@@ -20,40 +20,48 @@ input_samples:
   - DY2JetsToLL_M-50
   - DY3JetsToLL_M-50
   - DY4JetsToLL_M-50
-  - EmbeddedTauTau_Run2018A
-  - EmbeddedTauTau_Run2018B
-  - EmbeddedTauTau_Run2018C
-  - EmbeddedTauTau_Run2018D
+  - "EmbeddedTauTau_Run${year}A"
+  - "EmbeddedTauTau_Run${year}B"
+  - "EmbeddedTauTau_Run${year}C"
+  - "EmbeddedTauTau_Run${year}D"
+  # - "EmbeddedTauTau_Run${year}E"
+  # - "EmbeddedTauTau_Run${year}F"
+  # - "EmbeddedTauTau_Run${year}G"
+  # - "EmbeddedTauTau_Run${year}H"
   - GluGluHToTauTau_M125
-  - GluGluHToWWTo2L2Nu_M125
-  - HWminusJ_HToWW_M125
-  - HWplusJ_HToWW_M125
+  # - GluGluHToWWTo2L2Nu_M125
+  # - HWminusJ_HToWW_M125
+  # - HWplusJ_HToWW_M125
   - ST_t-channel_antitop_4f
   - ST_t-channel_top_4f
   - ST_tW_antitop_5f
   - ST_tW_top_5f
   - SUSYGluGluToBBHToTauTau_powheg_M125
-  - Tau_Run2018A
-  - Tau_Run2018B
-  - Tau_Run2018C
-  - Tau_Run2018D
+  - "Tau_Run${year}A"
+  - "Tau_Run${year}B"
+  - "Tau_Run${year}C"
+  - "Tau_Run${year}D"
+  # - "Tau_Run${year}E"
+  # - "Tau_Run${year}F"
+  # - "Tau_Run${year}G"
+  # - "Tau_Run${year}H"
   - TTTo2L2Nu
   - TTToHadronic
   - TTToSemiLeptonic
   - VBFHToTauTau_M125
-  - VBFHToWWTo2L2Nu_M125
+  # - VBFHToWWTo2L2Nu_M125
   - VVTo2L2Nu
   - WJetsToLNu
   - W1JetsToLNu
   - W2JetsToLNu
   - W3JetsToLNu
   - W4JetsToLNu
-  - WminusHToTauTau_M125
-  - WplusHToTauTau_M125
+  # - WminusHToTauTau_M125
+  # - WplusHToTauTau_M125
   - WZTo2L2Q
   - WZTo3LNu
-  - ZHJ_HToWW_M125
-  - ZHToTauTau_M125_13TeV
+  # - ZHJ_HToWW_M125
+  # - ZHToTauTau_M125_13TeV
   - ZZTo2L2Q
   - ZZTo4L
 input_pipe_file: 'data/bbH/${year}/skims/medium_wp/input_pipe.pkl' # relative path
