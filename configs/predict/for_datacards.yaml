@@ -1,5 +1,6 @@
 defaults:
   - ../preprocess@_global_.preprocess_cfg: prediction_data
+  - _self_
 
 kind: 'for_datacards'
 
