@@ -1,17 +1,29 @@
 # features to be used for training
 cont_features:
   - pt_1
+  # - eta_1
   - pt_2
+  # - eta_2
   - m_sv
   - m_vis
   - pt_tt
+  # - dr_tt
   - puppimet
   - jpt_1
+  # - jeta_1
+  # - jcsv_1
   - jpt_2
+  # - jeta_2
+  # - jcsv_2
   - bpt_1
+  # - bcsv_1
   - bpt_2
+  # - bcsv_2
   - jdeta
+  # - dijetpt
   - mjj
+  # - mbb
+  # - dRbb
 cat_features:
   - njets
   - nbtag

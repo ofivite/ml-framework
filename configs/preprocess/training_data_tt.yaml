@@ -6,36 +6,36 @@ defaults:
 
 # input section
 year: ???
-input_path: /nfs/dust/cms/user/filatovo/ML/ml-framework/data/bbH/${year}/original # should be absolute path
+input_path: /nfs/dust/cms/user/filatovo/ML/ml-framework/data/bbH/tt/UL/${year}/original # should be absolute path
 input_filename_template: '{sample_name}.root' # assume the same pattern for all input sample files
 input_tree_name: TauCheck
 common_cut: "(trg_doubletau>0.5) & (extraelec_veto<0.5) & (extramuon_veto<0.5) & (dr_tt>0.5) & (pt_1>40.) & (pt_2>40.) & \
               (byVVLooseDeepTau2017v2p1VSe_1>0.5) & (byVVLooseDeepTau2017v2p1VSe_2>0.5) & \
               (byVLooseDeepTau2017v2p1VSmu_1>0.5) & (byVLooseDeepTau2017v2p1VSmu_2>0.5) & \
-              (os>0.5) & (byMediumDeepTau2017v2p1VSjet_2>0.5)"
+              (byMediumDeepTau2017v2p1VSjet_1>0.5) & (byMediumDeepTau2017v2p1VSjet_2>0.5)"
 input_samples:
-  - SUSYGluGluToBBHToTauTau_powheg_M125: 
+  - SUSYGluGluToBBHToTauTau_powheg_M125_Jan22: 
       H_sig:
-        cut: '${common_cut} & (byMediumDeepTau2017v2p1VSjet_1>0.5)' 
+        cut: '${common_cut} & (os>0.5)' 
         class: 0 
   - GluGluHToTauTau_M125: 
       H_sig:
-        cut: '${common_cut} & (byMediumDeepTau2017v2p1VSjet_1>0.5) & (gen_nbjets>0)' 
+        cut: '${common_cut} & (os>0.5) & (gen_nbjets_cut>0)' 
         class: 0 
       H_bkgr:
-        cut: '${common_cut} & (byMediumDeepTau2017v2p1VSjet_1>0.5) & (gen_nbjets==0)' 
+        cut: '${common_cut} & (os>0.5) & (gen_nbjets_cut==0)' 
         class: 1
   - VBFHToTauTau_M125:
       H_bkgr:
-        cut: '${common_cut} & (byMediumDeepTau2017v2p1VSjet_1>0.5)'
+        cut: '${common_cut} & (os>0.5)'
         class: 1
-  - Data:
+  - Tau_Run2018:
       Fakes:
-        cut: '${common_cut} & (byMediumDeepTau2017v2p1VSjet_1<0.5)'
+        cut: '${common_cut} & (os<0.5)'
         class: 2
-  - EmbeddedTauTau:
+  - EmbeddedTauTau_Run2018:
       Taus:
-        cut: '${common_cut} & (byMediumDeepTau2017v2p1VSjet_1>0.5)'
+        cut: '${common_cut} & (os>0.5)'
         class: 3
 
 # train/test splitter & scaler
@@ -44,7 +44,7 @@ norm: True
 pca: False
 
 # output section
-output_path: data/bbH/${year}/skims/medium_wp/ # relative path
+output_path: data/bbH/tt/UL/${year}/skims/os/ # relative path
 output_filename_template: '{sample_name}'
 output_samples:
   - train

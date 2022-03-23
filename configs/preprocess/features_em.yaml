@@ -1,0 +1,50 @@
+input_branches: # will be loaded from input ROOT files
+  - mt_tot 
+  - pzeta 
+  - pt_tt 
+  - m_sv 
+  - bpt_1
+  - mjj
+  - dijeteta 
+  - jpt_1 
+  - puppimet 
+  - njets 
+  - dijetpt 
+  - beta_1 
+  - d0_1 
+  - d0_2 
+  - pt_1 
+  - pt_2 
+  - bcsv_1 
+  - bcsv_2 
+  - dRbb 
+  - mbb
+  - evt
+  - run
+  
+cont_features: # will be stored in the output foldfile as continuous features
+  - mt_tot 
+  - pzeta 
+  - pt_tt 
+  - m_sv 
+  - bpt_1
+  - mjj
+  - dijeteta 
+  - jpt_1 
+  - puppimet 
+  - dijetpt 
+  - beta_1 
+  - d0_1 
+  - d0_2 
+  - pt_1 
+  - pt_2 
+  - bcsv_1 
+  - bcsv_2 
+  - dRbb 
+  - mbb
+cat_features: # will be stored in the output foldfile as categorical features
+  - njets
+misc_features: # will be stored in the output foldfile as miscellaneous features
+  - evt
+  - run
+  - w_class_imbalance # see definition in preprocess.py

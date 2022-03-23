@@ -1,0 +1,26 @@
+# features to be used for training
+cont_features:
+  - mt_tot 
+  - pzeta 
+  - pt_tt 
+  - m_sv 
+  - bpt_1
+  - mjj
+  - dijeteta 
+  - jpt_1 
+  - puppimet 
+  - dijetpt 
+  - beta_1 
+  - d0_1 
+  - d0_2 
+  - pt_1 
+  - pt_2 
+  - bcsv_1 
+  - bcsv_2 
+  - dRbb 
+  - mbb
+cat_features:
+  - njets
+
+# training weight
+weight_name: 'w_class_imbalance'

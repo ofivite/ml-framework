@@ -1,0 +1,66 @@
+for_training: False
+compute_w_CP: False
+defaults:
+  - features
+  - _self_
+
+# override values
+misc_features: # will be stored in the output foldfile as miscellaneous features
+  - evt
+  - run
+
+# input section
+year: ???
+input_path: /nfs/dust/cms/user/cardinia/Maryam/SynchNTuples_UL_v2/ # should be absolute path
+input_filename_template: '{sample_name}.root' # assume the same pattern for all input sample files
+input_tree_name: TauCheck
+input_samples:
+
+  # ttbar
+  - TTToSemiLeptonic
+  - TTTo2L2Nu
+  - TTToHadronic
+
+  # higgs
+  - GluGluHToTauTau_M125
+  - VBFHToTauTau_M125
+  - bbHToTauTau_yt2_M125_MiniAODv2
+  - bbHToTauTau_yb2_M125_MiniAODv2
+  - BBHToTauTauYbYt_M125_13TeV
+  - ZHToTauTau_M125_13TeV
+  - WplusHToTauTau_M125
+  - WminusHToTauTau_M125
+
+  # ztt 
+  - DYJetsToLL_M-50
+  - DY1JetsToLL_M-50
+  - DY2JetsToLL_M-50
+  - DY3JetsToLL_M-50
+  - DY4JetsToLL_M-50
+
+  # misc.
+  - ST_t-channel_antitop_4f
+  - ST_t-channel_top_4f
+  - ST_tW_antitop_5f
+  - ST_tW_top_5f
+  - VVTo2L2Nu
+  - WJetsToLNu
+  - W1JetsToLNu
+  - W2JetsToLNu
+  - W3JetsToLNu
+  - W4JetsToLNu
+  - WZTo2L2Q
+  - WZTo3LNu
+  - ZZTo2L2Q
+  - ZZTo4L
+  - MuonEG_Run2018A
+  - MuonEG_Run2018B
+  - MuonEG_Run2018C
+  - MuonEG_Run2018D
+
+input_pipe_file: 'data/bbH/em/${year}/skims/input_pipe.pkl' # relative path
+
+# output section
+output_path:  data/bbH/em/${year}/skims/for_prediction # relative path
+output_filename_template: '{sample_name}' # {sample_name} here will be filled with names from "input_samples" above
+n_lumin_folds: 10 # will split output sample into these number of folds before saving to hdf5 file

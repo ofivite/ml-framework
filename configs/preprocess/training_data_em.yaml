@@ -1,0 +1,173 @@
+for_training: True
+compute_w_CP: False
+defaults:
+  - features
+  - _self_
+
+# input section
+year: ???
+input_path: /nfs/dust/cms/user/cardinia/Maryam/SynchNTuples_UL_v2/ # should be absolute path
+input_filename_template: '{sample_name}.root' # assume the same pattern for all input sample files
+input_tree_name: TauCheck
+common_cut: "( (pzeta>-35) & (pt_2>15) & (pt_1>15) & (iso_1<0.15) & (iso_2<0.2) & \
+             (((pt_1>24) & (trg_ehigh_mulow>0.5)) | ((pt_2>24) & (trg_muhigh_elow>0.5))) & \
+              (extraelec_veto<0.5) & (extramuon_veto<0.5) & (dr_tt>0.3) & (nbtag>0))"
+input_samples:
+
+  # ttbar
+  - TTToSemiLeptonic: 
+      tt:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 0 
+  - TTTo2L2Nu: 
+      tt:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 0 
+  - TTToHadronic: 
+      tt:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 0 
+  
+  # higgs
+  - GluGluHToTauTau_M125: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+  - VBFHToTauTau_M125: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+  - bbHToTauTau_yt2_M125_MiniAODv2: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+  - bbHToTauTau_yb2_M125_MiniAODv2: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+  - BBHToTauTauYbYt_M125_13TeV: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+  - ZHToTauTau_M125_13TeV: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+  - WplusHToTauTau_M125: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+  - WminusHToTauTau_M125: 
+      higgs:
+        cut: '${common_cut} & (os>0.5)' 
+        class: 1 
+
+  # ztt 
+  - DYJetsToLL_M-50:
+      ztt:
+        cut: '${common_cut} & (os>0.5)'
+        class: 2
+  - DY1JetsToLL_M-50:
+      ztt:
+        cut: '${common_cut} & (os>0.5)'
+        class: 2
+  - DY2JetsToLL_M-50:
+      ztt:
+        cut: '${common_cut} & (os>0.5)'
+        class: 2
+  - DY3JetsToLL_M-50:
+      ztt:
+        cut: '${common_cut} & (os>0.5)'
+        class: 2
+  - DY4JetsToLL_M-50:
+      ztt:
+        cut: '${common_cut} & (os>0.5)'
+        class: 2
+
+  # misc.
+  - ST_t-channel_antitop_4f:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - ST_t-channel_top_4f:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - ST_tW_antitop_5f:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - ST_tW_top_5f:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - VVTo2L2Nu:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - WJetsToLNu:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - W1JetsToLNu:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - W2JetsToLNu:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - W3JetsToLNu:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - W4JetsToLNu:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - WZTo2L2Q:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - WZTo3LNu:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - ZZTo2L2Q:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - ZZTo4L:
+      misc:
+        cut: '${common_cut} & (os>0.5)'
+        class: 3
+  - MuonEG_Run2018A:
+      misc:
+        cut: '${common_cut} & (os<0.5)'
+        class: 3
+  - MuonEG_Run2018B:
+      misc:
+        cut: '${common_cut} & (os<0.5)'
+        class: 3
+  - MuonEG_Run2018C:
+      misc:
+        cut: '${common_cut} & (os<0.5)'
+        class: 3
+  - MuonEG_Run2018D:
+      misc:
+        cut: '${common_cut} & (os<0.5)'
+        class: 3
+
+# train/test splitter & scaler
+train_size: 0.9
+norm: True
+pca: False
+
+# output section
+output_path: data/bbH/em/${year}/skims/ # relative path
+output_filename_template: '{sample_name}'
+output_samples:
+  - train
+  - test
+pipe_name: 'input_pipe' # filename for saving the feature scaling pipe
+n_lumin_folds: 10 # will split output sample into these number of folds before saving to hdf5 file
