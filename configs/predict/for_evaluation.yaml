@@ -6,7 +6,7 @@ run_id: ???
 
 # input path & info
 year: ???
-input_path: 'data/bbH/${year}/skims/medium_wp'
+input_path: 'data/bbH/tt/UL/${year}/skims/os'
 input_filename_template: '{sample_name}.hdf5'
 sample_names:
     - train
