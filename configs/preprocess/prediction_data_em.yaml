@@ -1,7 +1,7 @@
 for_training: False
 compute_w_CP: False
 defaults:
-  - features
+  - features_em
   - _self_
 
 # override values
