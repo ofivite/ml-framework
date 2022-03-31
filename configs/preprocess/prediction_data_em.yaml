@@ -63,4 +63,3 @@ input_pipe_file: 'data/bbH/em/${year}/skims/input_pipe.pkl' # relative path
 # output section
 output_path:  data/bbH/em/${year}/skims/for_prediction # relative path
 output_filename_template: '{sample_name}' # {sample_name} here will be filled with names from "input_samples" above
-n_lumin_folds: 10 # will split output sample into these number of folds before saving to hdf5 file

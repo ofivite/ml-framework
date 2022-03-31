@@ -1,10 +1,10 @@
 defaults:
-  - ../preprocess@_global_.preprocess_cfg: prediction_data
+  - ../preprocess@_global_.preprocess_cfg: prediction_data_tt
   - _self_
 
 kind: 'for_datacards'
 
-# model & scaling pipe to make predictions
+# mflow cfg
 experiment_id: ???
 run_id: ???
 
@@ -12,8 +12,8 @@ run_id: ???
 year: ???
 orig_path: ${preprocess_cfg.input_path}
 orig_filename_template: ${preprocess_cfg.input_filename_template}
-input_path: 'data/bbH/tt/${year}/skims/for_prediction'
-input_filename_template: '{sample_name}.hdf5'
+input_path: ${preprocess_cfg.output_path}
+input_filename_template: ${preprocess_cfg.output_filename_template}.h5
 sample_names: ${preprocess_cfg.input_samples}
 
 # output section

@@ -3,7 +3,7 @@ defaults:
   - features@_global_: bbH_tt
   - _self_
 
-# path to the train/test data & scaling pipe
+# path to the train/test data
 year: ???
 train_file: 'data/bbH/tt/UL/${year}/skims/os/train.hdf5'
 n_splits: 2 # will split training data into len(set(xtrain_split_feature % n_splits)) folds and train a separate model on each
