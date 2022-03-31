@@ -1,5 +1,5 @@
 defaults:
-  - ../preprocess@_global_.preprocess_cfg: prediction_data_tt
+  - ../preprocess/prediction_data@_global_.preprocess_cfg: bbH_tt
   - _self_
 
 kind: 'for_datacards'

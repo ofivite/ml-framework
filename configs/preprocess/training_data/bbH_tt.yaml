@@ -1,7 +1,7 @@
 for_training: True
 compute_w_CP: False
 defaults:
-  - features_tt
+  - ../features@_global_: bbH_tt
   - _self_
 
 # input section

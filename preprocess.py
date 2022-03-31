@@ -18,7 +18,7 @@ from omegaconf import OmegaConf, DictConfig
 
 from utils.processing import fill_placeholders
 
-@hydra.main(config_path="configs/preprocess")
+@hydra.main()
 def main(cfg: DictConfig) -> None:
     cont_features = OmegaConf.to_object(cfg["cont_features"]) if cfg["cont_features"] is not None else None
     cat_features = OmegaConf.to_object(cfg["cat_features"]) if cfg["cat_features"] is not None else None
