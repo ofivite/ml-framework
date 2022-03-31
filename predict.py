@@ -7,11 +7,10 @@ from omegaconf import OmegaConf, DictConfig
 
 import ROOT as R
 import uproot
-from lumin.nn.data.fold_yielder import FoldYielder
 import pandas as pd
 import mlflow
 
-from utils.processing import fill_placeholders
+from utils.processing import fill_placeholders, read_hdf
 from utils.inference import load_models, predict_folds
 
 @hydra.main(config_path="configs/predict")
@@ -33,21 +32,14 @@ def main(cfg: DictConfig) -> None:
 
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
     with mlflow.start_run(experiment_id=cfg.experiment_id, run_id=cfg.run_id):
-        # loop over input fold files
+        # loop over input samples
         for sample_name in cfg.sample_names:
             print(f'\n--> Predicting {sample_name}')
             print(f"        loading data set")
             input_filename = fill_placeholders(cfg.input_filename_template, {'{sample_name}': sample_name})
 
-            # extract DataFrame from fold file
-            fy = FoldYielder(f'{input_path}/{input_filename}')
-            df = fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
-            for f in misc_features: # add misc features
-                if f not in df.columns:
-                    if f in fy.columns():
-                        df[f] = fy.get_column(f)
-                    else:
-                        raise KeyError(f'Couldn\'t find {f} neither in DataFrame nor in FoldYielder columns')
+            # read DataFrame from input file
+            df = read_hdf(f'{input_path}/{input_filename}', key_list=['cont_features', 'cat_features', 'misc_features', 'targets'])
             df[fold_id_column] = (df[xtrain_split_feature] % n_splits).astype('int32')
 
             # run cross-inference for folds
