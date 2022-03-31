@@ -1,7 +1,5 @@
-import gc
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from sklearn.model_selection import LeaveOneGroupOut, ShuffleSplit
 import lightgbm as lgb
@@ -9,31 +7,34 @@ import mlflow
 import mlflow.lightgbm
 from mlflow.models.signature import infer_signature
 
-from lumin.nn.data.fold_yielder import FoldYielder
-
 import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
+from utils.processing import read_hdf
 
 @hydra.main(config_path="configs/train", config_name="train")
 def main(cfg: DictConfig) -> None:
-    # load training data into DataFrame + add necessary columns
+    # load groups into DataFrame
     print('\n--> Loading training data')
     train_file = to_absolute_path(cfg.train_file)
-    train_fy = FoldYielder(train_file)
-    train_df = train_fy.get_df(inc_inputs=True, deprocess=False, nan_to_num=False, verbose=False, suppress_warn=True)
-    train_df['w_cp'] = train_fy.get_column('w_cp')
-    train_df['w_class_imbalance'] = train_fy.get_column('w_class_imbalance')
+    train_df = read_hdf(train_file, key_list=['cont_features', 'cat_features', 'misc_features', 'targets'])
 
-    # define feature/weight/target names
-    train_features = cfg.cont_features + cfg.cat_features # features to be used in training
+    # define training features/weights/targets
+    train_features = []  
+    if cfg.cont_features is not None:
+        train_features += cfg.cont_features 
+    if cfg.cat_features is not None:
+        train_features += cfg.cat_features
+    if len(train_features) == 0:
+        raise RuntimeError('Both continuous and categorical features are None')
+
     weight_name = cfg.weight_name
-    target_name = 'gen_target' # internal target name defined inside of lumin library
+    target_name = 'target' # internal target name defined at preprocessing step
     fold_id_column = 'fold_id'
 
     if cfg.n_splits > 1:
         assert type(cfg.n_splits)==int
-        split_feature_values = train_fy.get_column(cfg.xtrain_split_feature)
+        split_feature_values = train_df[cfg.xtrain_split_feature].values
         train_df[fold_id_column] = (split_feature_values % cfg.n_splits).astype('int32')
 
         # check that there is no more that 5% difference between folds in terms of number of entries
@@ -51,7 +52,6 @@ def main(cfg: DictConfig) -> None:
         idx_yielder = splitter.split(train_df)
     else:
         raise ValueError(f'n_splits should be positive integer, got {cfg.n_splits}')
-    train_fy.close(); del(train_fy); gc.collect()
 
     with mlflow.start_run() as active_run:
         # enable auto logging for mlflow & log some cfg parameters
