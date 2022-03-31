@@ -8,8 +8,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 
 from lumin.utils.misc import ids2unique
-from lumin.data_processing.pre_proc import fit_input_pipe, proc_cats
-from lumin.data_processing.file_proc import df2foldfile
 
 import os
 import pickle
@@ -22,9 +20,9 @@ from utils.processing import fill_placeholders
 
 @hydra.main(config_path="configs/preprocess")
 def main(cfg: DictConfig) -> None:
-    cont_features = OmegaConf.to_object(cfg.cont_features)
-    cat_features = OmegaConf.to_object(cfg.cat_features)
-    misc_features = OmegaConf.to_object(cfg.misc_features)
+    cont_features = OmegaConf.to_object(cfg.cont_features) if cfg.cont_features is not None else None
+    cat_features = OmegaConf.to_object(cfg.cat_features) if cfg.cat_features is not None else None
+    misc_features = OmegaConf.to_object(cfg.misc_features) if cfg.misc_features is not None else None
     input_branches = OmegaConf.to_object(cfg.input_branches)
     output_path = to_absolute_path(cfg.output_path)
     os.makedirs(output_path, exist_ok=True)
@@ -74,10 +72,6 @@ def main(cfg: DictConfig) -> None:
 
     # clip tails in njets
     data['njets'] = data.njets.clip(0, 5)
-
-    # process categorical features to be valued 0->cardinality-1
-    # TODO: think if doing this transformation jointly may cause troubles
-    cat_maps, cat_szs = proc_cats(data, cat_features)
 
     # split data into output nodes: either train+test (for training) or sample_name based splitting (for prediction)
     if cfg.for_training:
@@ -146,15 +140,17 @@ def main(cfg: DictConfig) -> None:
         output_sample[cont_features] = input_pipe.transform(output_sample[cont_features].values.astype('float32'))
 
         # store into a hdf5 fold file
-        df2foldfile(df=output_sample,
-                    n_folds=cfg.n_lumin_folds, strat_key=strat_key,
-                    cont_feats=cont_features,
-                    cat_feats=cat_features, cat_maps=cat_maps,
-                    targ_feats=_target, targ_type='int',
-                    wgt_feat=None,
-                    misc_feats=misc_features,
-                    savename=f'{output_path}/{output_sample_name}'
-                    )
+        output_filename = f'{output_path}/{output_sample_name}'
+        if os.path.exists(f'{output_filename}.h5'):
+            os.remove(f'{output_filename}.h5')
+        group_names = ['cont_features', 'cat_features', 'misc_features', 'targets']
+        group_list = [cont_features, cat_features, misc_features, [_target]]
+        for group_name, group in zip(group_names, group_list):
+            if group is not None:
+                output_sample[group].to_hdf(f'{output_filename}.h5', key=group_name, mode='a')
+    
+    # save input config
+    OmegaConf.save(config=cfg, f=f'{output_path}/cfg.yaml')
 
 if __name__ == '__main__':
     main()
