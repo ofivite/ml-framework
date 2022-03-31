@@ -10,10 +10,10 @@ def plot_class_score(df, class_id, class_to_info, how='density', weight=None):
     sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 2.5})
     if how=='density':
         if 'pred_class' not in df.columns or \
-            'gen_target' not in df.columns or \
+            'target' not in df.columns or \
               'pred_class_proba' not in df.columns:
-            raise KeyError('Couldn\'t find pred_class/gen_target/pred_class_proba in DataFrame with predictions')
-        hist_data = [df.query(f'pred_class == {class_id} and gen_target == {i}')['pred_class_proba'] for i in class_to_info]
+            raise KeyError('Couldn\'t find pred_class/target/pred_class_proba in DataFrame with predictions')
+        hist_data = [df.query(f'pred_class == {class_id} and target == {i}')['pred_class_proba'] for i in class_to_info]
         class_labels = [class_to_info[i].name for i in class_to_info]
         class_colors = [f'rgba({class_to_info[i].color}, 1.)' if i==class_id # emphasize category class by increase in transparency
                                                               else f'rgba({class_to_info[i].color}, .2)'
@@ -32,7 +32,7 @@ def plot_class_score(df, class_id, class_to_info, how='density', weight=None):
         return fig
     elif how=='stacked':
         fig = px.histogram(df.query(f'pred_class == {class_id}'), x="pred_class_proba", y=weight,
-                   color="gen_target",
+                   color="target",
                    marginal="box", # or violin, or rug
                    barmode='group',
                    histfunc='sum',
@@ -69,7 +69,7 @@ def plot_curves(df, class_to_info):
     )
 
     for class_i, class_info in class_to_info.items():
-        y_true = df['gen_target'] == class_i
+        y_true = df['target'] == class_i
         y_score = df[f'pred_class_{class_i}_proba']
 
         # weights to account for class imbalance (PR curve is sensitive to that)

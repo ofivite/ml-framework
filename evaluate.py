@@ -18,7 +18,7 @@ def main(cfg: DictConfig) -> None:
 
     # check that class id match in data and in training cfg
     class_ids = {int(class_id) for class_id in cfg.class_to_info}
-    assert set(df_pred.gen_target) == class_ids
+    assert set(df_pred['target']) == class_ids
     class_names = []
 
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
@@ -40,7 +40,7 @@ def main(cfg: DictConfig) -> None:
         # make confusion matrix
         print(f'\n--> Producing confusion matrix')
         for confusion_norm in ['true', 'pred']:
-            cm = confusion_matrix(df_pred['gen_target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=df_pred['w_class_imbalance'])
+            cm = confusion_matrix(df_pred['target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=df_pred['w_class_imbalance'])
             disp = ConfusionMatrixDisplay(cm, display_labels=class_names)
             for class_id in cfg.class_to_info:
                 mlflow.log_metric(f'cm_{class_id}{class_id}_{confusion_norm} / {cfg.dataset}', cm[class_id,class_id])
