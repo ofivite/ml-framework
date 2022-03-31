@@ -3,8 +3,9 @@ import uproot
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
 
 from lumin.utils.misc import ids2unique
 from lumin.data_processing.pre_proc import fit_input_pipe, proc_cats
@@ -90,8 +91,24 @@ def main(cfg: DictConfig) -> None:
         output_sample_names = cfg.output_samples
         assert len(output_sample_names)==len(output_samples)
 
-        # fit scaling pipe
-        input_pipe = fit_input_pipe(output_samples[0], cont_features, f'{output_path}/{cfg.pipe_name}', norm_in=cfg.norm, pca=cfg.pca)
+        # create preprocessing pipe
+        pipe_list = []
+
+        # note: make sure the pipeline order is as intended
+        if cfg['pca'] is not None:
+            pipe_list.append(('pca', PCA(n_components=cfg['pca']['n_components'], whiten=cfg['pca']['whiten'])))
+        if cfg['scaler'] is not None:
+            pipe_list.append(('scaler', StandardScaler(with_mean=cfg['scaler']['with_mean'], with_std=cfg['scaler']['with_std'])))
+
+        if len(pipe_list) > 0: # use specified pipe elements
+            input_pipe = Pipeline(pipe_list) 
+        else: # create pipe with identity scaling
+            input_pipe = Pipeline(('identity', StandardScaler(with_mean=False, with_std=False)))
+        
+        # fit, transform and save pipeline
+        input_pipe.fit(X=output_samples[0][cont_features].values.astype('float32')) # use only training data & continuous feats for that
+        with open(f'{output_path}/{cfg.pipe_name}.pkl', 'wb') as fout: pickle.dump(input_pipe, fout)
+        
     else:
         strat_key = None # no stratification for prediction
         outputs = {name: group for name, group in data.groupby('group_name')}
@@ -125,8 +142,8 @@ def main(cfg: DictConfig) -> None:
                 output_sample['class_weight'] = output_sample[_target].map(class_weight_map)
                 output_sample['w_cp'] = abs(output_sample['weight'])*output_sample['class_weight']
 
-        # apply normalisation
-        output_sample[cont_features] = input_pipe.transform(output_sample[cont_features])
+        # apply preprocessing pipeline
+        output_sample[cont_features] = input_pipe.transform(output_sample[cont_features].values.astype('float32'))
 
         # store into a hdf5 fold file
         df2foldfile(df=output_sample,

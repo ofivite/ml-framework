@@ -160,8 +160,10 @@ input_samples:
 
 # train/test splitter & scaler
 train_size: 0.9
-norm: True
-pca: False
+scaler:   # null to not apply scaling
+  with_mean: True
+  with_std: True
+pca: null # null to not apply PCA
 
 # output section
 output_path: data/bbH/em/${year}/skims/ # relative path
