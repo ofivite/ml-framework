@@ -38,25 +38,25 @@ The newly created kernel can now be activated in the Jupyter selection menu (top
 **NB:** For correct `plotly` rendering in JupyterLab, [check](https://plotly.com/python/troubleshooting/#jupyterlab-problems) that extensions are enabled in Extension Manager (located in the corresponding tab on the left panel of the JupyterLab window) and `jupyterlab-plotly` is displayed amongst them.
 
 ## Data preprocessing
-As the very first step, input ROOT files are preprocessed and skimmed within the framework prior to training. This is done with `preprocess.py` script, which combines the input set of ROOT files (also referred to as _nodes_) into a single pandas dataframe, then performs necessary transformations/additions/filtering, then splits the dataframe into the output nodes and stores each into `hdf5` foldfile using `df2foldfile` function of [`lumin`](https://lumin.readthedocs.io/en/stable/) library. Conceptually, the preprocessing stage can be viewed as a _dataflow_, where input source files are firstly merged into a single stream which then flows through a series of transformations and splits towards its end, which would be a storage into `hdf5` foldfiles.
+As the very first step, input ROOT files are preprocessed and skimmed within the framework prior to training. This is done with `preprocess.py` script, which combines the input set of ROOT files (also referred to as _nodes_) into a single pandas DataFrame, then performs necessary transformations/additions/filtering, then splits the dataframe into the output nodes and stores each into `hdf5` file. Conceptually, the preprocessing stage can be viewed as a _dataflow_, where input source files are firstly merged into a single stream which then flows through a series of transformations and splits towards its end, which would be a storage into `hdf5` files.
 
-There are two paths in this preprocessing dataflow: the one to skim the data set for training and the other to skim it to make predictions for final statistical inference. This is done by the same `preprocessing.py` script and the flag `for_training` in the input cfg file indicates the path to be followed within the script. Therefore, there are two configs which define what and how needs to be skimmed, each corresponding to either training or prediction paths: `configs/preprocess/training_data.yaml` and  `configs/preprocess/prediction_data.yaml` respectively. These configs are passed to `preprocessing.py` with [`hydra`](https://hydra.cc/docs/intro), see its documentation for more details on the usage.
+There are two paths in this preprocessing dataflow: the one to skim the data set for training and the other to skim it to make predictions for final statistical inference. This is done by the same `preprocessing.py` script and the flag `for_training` in the input cfg file indicates the path to be followed within the script. Therefore, there are two configs which define what and how needs to be skimmed, each corresponding to either training or prediction paths: `configs/preprocess/training_data/*.yaml` and  `configs/preprocess/prediction_data/*.yaml` respectively. These configs are passed to `preprocessing.py` with [`hydra`](https://hydra.cc/docs/intro), see its documentation for more details on the usage.
 
-For example, in order to prepare the data for training on 2018 data one needs to execute (note that there is no need to specify in the command line prepath `configs/preprocess`):
+For example, in order to prepare 2018 data for bbH analysis in the tautau channel for training one needs to execute:
 
 ```bash
-python preprocess.py --config-name training_data.yaml year=2018
-# python preprocess.py --config-name prediction_data.yaml year=2018 ### preprocessing of data for prediction
+python preprocess.py --config-path configs/preprocess/training_data --config-name bbH_tt.yaml year=2018
+# python preprocess.py --config-path configs/preprocess/prediction_data --config-name bbH_tt.yaml year=2018 ### preprocessing of data for prediction
 ```
 
-This will produce out of the input ROOT files in `input_path` folder `hdf5` skims in the `output_path`, which can be further passed to a model of one's choice.
+This will produce out of the input ROOT files in `input_path` folder `hdf5` skims in the `output_path`, which can be further passed to a model of one's choice. Note that inside of `hdf5` files continuous/categorical/miscellaneous features and labels are stored as separate groups. 
 
-**NB:** generally speaking, it is the user's responsibility to implement preprocessing which is appropriate for their analysis. Current implementation includes simple checks for NaN/inf values (without their preprocessing), [categorical feature treatment](https://lumin.readthedocs.io/en/stable/lumin.data_processing.html#lumin.data_processing.pre_proc.proc_cats), scaling with [`input_pipe`](https://lumin.readthedocs.io/en/stable/lumin.data_processing.html#lumin.data_processing.pre_proc.fit_input_pipe) and clipping of `njets`.
+**NB:** generally speaking, it is the user's responsibility to implement preprocessing which is appropriate for their analysis. Current implementation includes simple checks for NaN/inf values (without their preprocessing), scaling/PCA as a sklearn [`pipeline`](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html) and clipping of `njets`.
 
 ## Model training
-To track the model training [`mlflow`](https://mlflow.org/docs/latest/index.html) project has been set up, see its description in `MLproject` file. There is currently one entry points _main_ (multiclass classification problem, default) which runs `python train.py` with necessary parameters from `configs/train/train.yaml` added/overriden. There is `hydra` also used under the hood to parse those parameters from the `yaml` cfg file.  
+To track the model training [`mlflow`](https://mlflow.org/docs/latest/index.html) project has been set up, see its description in `MLproject` file. There is currently one entry points _main_ which runs `python train.py` with necessary parameters from `configs/train/train.yaml` added/overriden. There is `hydra` also used under the hood to parse those parameters from the `yaml` cfg file.  
 
-Internally, [`FoldYielder`](https://lumin.readthedocs.io/en/stable/core_concepts.html#reading-fold-files) class of `lumin` is used to extract pandas DataFrames from input foldfiles and pass it on to the model. At the moment, only gradient boosting on trees (aka BDT) with [`lightgbm`](https://lightgbm.readthedocs.io/en/latest/) is implemented to solve the classification problem. More models and architectures are to be interfaced with the framework in the nearest future.
+Training data is extracted as pandas DataFrames from `hdf5` files (produced at `preprocess.py` step) and further passed to the model (without any preprocessing). At the moment, only gradient boosting on trees (aka BDT) with [`lightgbm`](https://lightgbm.readthedocs.io/en/latest/) is implemented to solve the classification problem.
 
 To train and track the model create an experiment (unless already done) and run it with `mlflow` specifying:
 *  a corresponding entry point (with `-e` option, defaults to `main`)
@@ -102,7 +102,7 @@ Then one can access `mlflow` UI locally by going to http://localhost:5010 in a b
 **NB:** it is important to **close all the ports** after their usage is finished, otherwise they will likely hang there forever. This implies executing `Ctrl+C` to close the server with `mlflow ui`, and then also manually closing the ssh tunnels locally (i.e. on one's laptop). Depending on the OS, it can be done either via system process manager, or in the terminal with firstly finding the corresponding processes with `ps aux | grep ssh`, and then killing it with `kill <process_id>`. If you see that on the remote machine you can't create a port because of the error "Connection in use" (likely because it wasn't closed before), you can find the corresponding process ID with `ps aux | grep mlflow` and kill it with `kill <process_ID>`.   
 
 ## Making predictions
-Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (skimmed by `preprocess.py`). This is performed with `predict.py` script which loads the model(s) with `mlflow` given the corresponding `experiment_ID` and `run_ID`, opens each of the input fold files with `FoldYielder` and passes the data to the model(s). 
+Given the trained model, one can now produce predictions for further inference for the given set of `hdf5` files (produced by `preprocess.py`). This is performed with `predict.py` script which loads the model(s) with `mlflow` given the corresponding `experiment_ID` and `run_ID`, opens each of the input `sample_names` files (specified in the input yaml cfg file) and passes the data to the model(s). 
 
 Prediction workflow is also implemented to be in N-fold fashion, which should be transparent to the user similarly to the training step. The number of splits is infered from `mlflow` logs for the corresponding run ID, so that the strategy of the prediction split is automatically adapted to the strategy of the training split. That is, conceptually only `experiment_id`/`run_id` and path to input data is needed to produce predictions and store them to the output files. Variables stored are (see `utils/inference.py` for details) `pred_class_{i}_proba` (predicted probability of i-th class), `pred_class` (argmax of output nodes), `pred_class_proba` (probability of `pred_class`) and additionally `misc_features` as those specified in the cfg file.     
 
@@ -118,11 +118,13 @@ TFile *f = new TFile("file_pred.root","READ");
 TFile *F = new TFile("file_main.root","READ");
 TTree* t = (TTree*)f->Get("tree");
 TTree* T = (TTree*)F->Get("tree");
-t->BuildIndex("evt");
-T->BuildIndex("evt");
 T->AddFriend(t);
 T->Scan("pred_class_proba:evt");
 ```
+
+Please note that during datacard production/statistical inference one needs to make sure that the correct mapping of events between input tuples and predictions is established. Within the framework, the mapping is implemented in a way that predictions for the i-th entry in the input tree has the i-th positional index in the prediction tree. Events are rearranged based on the values of `(evt, run)` pair, which is usually a unique identifier of event across all the data samples. 
+
+This rearrangement corresponds to the scenario when input and prediction friend trees are combined together with `T->AddFriend(t)` without any explicit reindexing on the ROOT side (this reindexing seems to take extremely long time). By default, it implies the mapping where the i-th entry in one tree is mapped to the i-th entry in the other.
 
 The second option `for_evaluation` is implemented in order to run the next step of estimating the model performance:
 ```bash
