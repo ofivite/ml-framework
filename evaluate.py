@@ -40,7 +40,7 @@ def main(cfg: DictConfig) -> None:
         # make confusion matrix
         print(f'\n--> Producing confusion matrix')
         for confusion_norm in ['true', 'pred']:
-            cm = confusion_matrix(df_pred['target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=df_pred['w_class_imbalance'])
+            cm = confusion_matrix(df_pred['target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=df_pred[cfg["weights"]])
             disp = ConfusionMatrixDisplay(cm, display_labels=class_names)
             for class_id in cfg["class_to_info"]:
                 mlflow.log_metric(f'cm_{class_id}{class_id}_{confusion_norm} / {cfg["dataset"]}', cm[class_id,class_id])

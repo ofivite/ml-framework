@@ -1,0 +1,20 @@
+model_param:
+  objective: 'multiclass'
+  num_class: 2
+  metric: ['multi_logloss', 'multi_error']
+  learning_rate: 0.1
+  early_stopping: 150
+  first_metric_only: True
+  metric_freq: 10
+  is_training_metric: True
+  max_depth: 7
+  bagging_fraction: 0.5
+  bagging_freq: 5
+  bagging_seed: 1357
+  feature_fraction: 0.8
+  lambda_l1: 0
+  feature_fraction_bynode: 1
+  num_threads: 8
+  verbosity: 1
+  seed: 1357
+  num_iterations: 2000

@@ -3,9 +3,9 @@ conda-env: conda.yaml
 entry_points:
   main:
     parameters:
-      year: {type: str, default: "2018"}
-      n_splits: {type: int, default: 2}
-      num_iterations: {type: int, default: 10}
+      year: {type: str, default: "2022"}
+      n_splits: {type: int, default: 1}
+      num_iterations: {type: int, default: 2000}
     command: "python train.py year={year} \
                               n_splits={n_splits} \
                               model_param.num_iterations={num_iterations}"

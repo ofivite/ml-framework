@@ -70,8 +70,8 @@ def main(cfg: DictConfig) -> None:
     if (inf_sum := np.sum(data_infs.values)) > 0:
         raise Exception(f'\nFound {inf_sum} inf values in columns: {data_infs.columns[data_infs.any(axis=0)].tolist()}. Please take care of preprocessing them.')
 
-    # clip tails in njets
-    data['njets'] = data.njets.clip(0, 5)
+    # clip tails in njets # HARD CODED njets
+    # data['njets'] = data.njets.clip(0, 5)
 
     # split data into output nodes: either train+test (for training) or sample_name based splitting (for prediction)
     if cfg["for_training"]:

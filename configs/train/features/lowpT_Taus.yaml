@@ -1,0 +1,27 @@
+cont_features:
+  - pi1r_dz
+  - pi2r_dz
+  - pi3r_dz
+  - mrho
+  - deta12
+  - dphi12 
+  - deta23
+  - dphi23 
+  - deta31
+  - dphi31 
+  - weighteddR 
+  - pi1r_pt
+  - pi2r_pt
+  - pi3r_pt
+  - pi1r_doca2d
+  - pi2r_doca2d
+  - pi3r_doca2d
+  - pi1r_doca2ds
+  - pi2r_doca2ds
+  - pi3r_doca2ds
+  - mpipi
+  - vis_mass
+
+cat_features:
+
+weight_name: 'w_1'
