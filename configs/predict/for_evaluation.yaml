@@ -6,6 +6,8 @@ run_id: ???
 
 # input path & info
 year: ???
+cutoff: 0.7
+class_cutoff: 0
 input_path: 'data/lowpT_Taus/${year}/skims'
 input_filename_template: '{sample_name}.h5'
 sample_names:
@@ -16,5 +18,5 @@ sample_names:
 misc_features: # will be added to output file along with prediction branches
     - evt
     - target
-    - w_1
+    - w_class_imbalance
 output_filename_template: '{sample_name}.csv' # will log the files to corresponding mlflow run

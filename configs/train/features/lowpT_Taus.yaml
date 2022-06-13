@@ -1,7 +1,5 @@
 cont_features:
   - pi1r_dz
-  - pi2r_dz
-  - pi3r_dz
   - mrho
   - deta12
   - dphi12 
@@ -21,7 +19,13 @@ cont_features:
   - pi3r_doca2ds
   - mpipi
   - vis_mass
+  - pi1r_deta
+  - pi2r_deta
+  - pi3r_deta
+  - pi1r_dphi
+  - pi2r_dphi
+  - pi3r_dphi
 
 cat_features:
 
-weight_name: 'w_1'
+weight_name: 'w_class_imbalance'

@@ -19,6 +19,12 @@ input_branches: # will be loaded from input ROOT files
   - pi1r_doca2ds
   - pi2r_doca2ds
   - pi3r_doca2ds
+  - pi1r_deta
+  - pi2r_deta
+  - pi3r_deta
+  - pi1r_dphi
+  - pi2r_dphi
+  - pi3r_dphi
   - mpipi
   - vis_mass
   - dup_flag
@@ -47,11 +53,17 @@ cont_features: # will be stored in the output foldfile as continuous features
   - pi1r_doca2ds
   - pi2r_doca2ds
   - pi3r_doca2ds
+  - pi1r_deta
+  - pi2r_deta
+  - pi3r_deta
+  - pi1r_dphi
+  - pi2r_dphi
+  - pi3r_dphi
   - mpipi
   - vis_mass
 cat_features: # will be stored in the output foldfile as categorical features
   - dup_flag
 misc_features:
-  - w_1
+  - w_class_imbalance
   - evt
   - run

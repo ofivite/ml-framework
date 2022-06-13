@@ -42,8 +42,25 @@ def main(cfg: DictConfig) -> None:
             df = read_hdf(f'{input_path}/{input_filename}', key_list=['cont_features', 'cat_features', 'misc_features', 'targets'])
             df[fold_id_column] = (df[xtrain_split_feature] % n_splits).astype('int32')
 
+            classcut = None
+            cutoff = None
             # run cross-inference for folds
-            pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models)
+            try:
+                cutoff = float(cfg['cutoff'])
+            except:
+                cutoff = None
+                print('Cutoff is None, will take max for clas pred.')
+
+            try:
+                classcut = int(cfg['class_cutoff'])
+            except:
+                cutoff = None
+                print('Cutoff class is ivalid, will take max for clas pred.')
+
+            if cutoff is not None:
+                pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models, cfgparam=cutoff, cfgclass=classcut)
+            else:
+                pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models)
 
             print(f"        storing to output file")
             output_filename = fill_placeholders(cfg["output_filename_template"], {'{sample_name}': sample_name})

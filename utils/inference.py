@@ -25,7 +25,7 @@ def load_models(run_folder):
     models = [load_model(f'{run_folder}/artifacts/model_{i_fold}') for i_fold in range(n_splits)]
     return models, n_splits, xtrain_split_feature
 
-def predict_folds(df, train_features, misc_features, fold_id_column, models):
+def predict_folds(df, train_features, misc_features, fold_id_column, models, cfgparam=None, cfgclass=None):
     if (n_groups:=len(set(df[fold_id_column]))) != (n_splits:=len(models)):
         raise Exception(f'Number of fold groups in the input DataFrame ({n_groups}) \
                                     is not equal to the number of splits infered from the number of models ({n_splits}).')
@@ -58,8 +58,17 @@ def predict_folds(df, train_features, misc_features, fold_id_column, models):
         y_proba = models[0].predict(df[train_features])
         for i in range(y_proba.shape[-1]):
             pred_dict[f'pred_class_{i}_proba'] = y_proba[:,i]
-        pred_dict['pred_class'] = np.argmax(y_proba, axis=-1).astype(np.int32)
-        pred_dict['pred_class_proba'] = np.max(y_proba, axis=-1).astype(np.float32)
+        
+        if cfgparam is not None:
+            pred_dict['pred_class'] = []
+            pred_dict['pred_class_proba'] = []
+            for i in range(y_proba.shape[0]):
+                pred_dict['pred_class'].append(cfgclass.astype(np.int32) as if y_proba[i,cfgclass] > cfgparam else (np.argsort(y_proba[i])[-2] if np.argmax(y_proba[i]) == cfgclass else np.argmax(y_proba[i]).astype(np.int32)))
+                pred_dict['pred_class_proba'].append(y_proba[i,cfgclass].astype(np.float32) if y_proba[i,cfgclass] > cfgparam else y_proba[i, (np.argsort(y_proba[i])[-2] if np.argmax(y_proba[i]) == cfgclass else np.argmax(y_proba[i]).astype(np.int32))])
+        else:
+            pred_dict['pred_class'] = np.argmax(y_proba, axis=-1).astype(np.int32)
+            pred_dict['pred_class_proba'] = np.max(y_proba, axis=-1).astype(np.float32)
+
         for f in misc_features:
             pred_dict[f] = df[f].to_numpy()
     else:
