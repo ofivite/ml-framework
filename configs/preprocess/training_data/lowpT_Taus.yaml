@@ -25,7 +25,7 @@ scaler:   # null to not apply scaling
   with_std: True
 pca: null # null to not apply PCA
 weights:
-  0: 20
+  0: 1
   1: 1
 
 # output section
