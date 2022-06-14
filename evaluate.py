@@ -29,17 +29,21 @@ def main(cfg: DictConfig) -> None:
             class_names.append(class_name)
 
             print(f'\n--> Plotting density for class ({class_name})')
-            fig_density_name = f'density_{class_name}.pdf'
-            fig_density = plot_class_score(df_pred, class_id, cfg["class_to_info"], how='density')
-            fig_density.write_image(fig_density_name)
-            mlflow.log_figure(fig_density, f'plots/{cfg["dataset"]}/density_{class_name}.html')
-            mlflow.log_artifact(fig_density_name, f'plots/{cfg["dataset"]}/pdf')
-            os.remove(fig_density_name)
+            try:
+                fig_density_name = f'density_{class_name}.pdf'
+                fig_density = plot_class_score(df_pred, class_id, cfg["class_to_info"], how='density')
+                fig_density.write_image(fig_density_name)
+                mlflow.log_figure(fig_density, f'plots/{cfg["dataset"]}/density_{class_name}.html')
+                mlflow.log_artifact(fig_density_name, f'plots/{cfg["dataset"]}/pdf')
+                os.remove(fig_density_name)
+            except Exception:
+                print(f'\n--! FAILED ! Plotting density for class ({class_name})')
+                pass
             # fig_stacked = plot_class_score(df_pred, class_id, cfg["class_to_info"], how='stacked', weight='plot_weight')
 
         # make confusion matrix
         print(f'\n--> Producing confusion matrix')
-        for confusion_norm in ['true', 'pred']:
+        for confusion_norm in ['true', 'pred', None]:
             cm = confusion_matrix(df_pred['target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=None)
             disp = ConfusionMatrixDisplay(cm, display_labels=class_names)
             for class_id in cfg["class_to_info"]:
@@ -48,14 +52,14 @@ def main(cfg: DictConfig) -> None:
             fig, ax = plt.subplots(figsize=(10, 9))
             disp.plot(cmap='Blues', ax=ax)
             cm_name = f'confusion_matrix_{confusion_norm}.pdf'
-            ax.set_title(f'Confusion matrix: class balanced, normalize={confusion_norm}')
+            ax.set_title(f'Confusion matrix: normalize={confusion_norm}')
             fig.savefig(cm_name)
             mlflow.log_artifact(cm_name, f'plots/{cfg["dataset"]}/pdf')
             os.remove(cm_name)
 
         # plot ROC and precision-recall curves for each class
         print(f'\n--> Plotting ROC & PR curves')
-        for curve_name, curve_data in plot_curves(df_pred, cfg["class_to_info"]).items():
+        for curve_name, curve_data in plot_curves(df_pred, cfg["class_to_info"], mlflow).items():
             curve_data['figure'].write_image(f'{curve_name}_curve.pdf')
             mlflow.log_figure(curve_data['figure'], f'plots/{cfg["dataset"]}/{curve_name}_curve.html')
             for class_name in class_names:

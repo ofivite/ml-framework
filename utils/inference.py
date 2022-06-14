@@ -63,7 +63,7 @@ def predict_folds(df, train_features, misc_features, fold_id_column, models, cfg
             pred_dict['pred_class'] = []
             pred_dict['pred_class_proba'] = []
             for i in range(y_proba.shape[0]):
-                pred_dict['pred_class'].append(cfgclass.astype(np.int32) as if y_proba[i,cfgclass] > cfgparam else (np.argsort(y_proba[i])[-2] if np.argmax(y_proba[i]) == cfgclass else np.argmax(y_proba[i]).astype(np.int32)))
+                pred_dict['pred_class'].append(cfgclass if y_proba[i,cfgclass] > cfgparam else (np.argsort(y_proba[i])[-2] if np.argmax(y_proba[i]) == cfgclass else np.argmax(y_proba[i]).astype(np.int32)))
                 pred_dict['pred_class_proba'].append(y_proba[i,cfgclass].astype(np.float32) if y_proba[i,cfgclass] > cfgparam else y_proba[i, (np.argsort(y_proba[i])[-2] if np.argmax(y_proba[i]) == cfgclass else np.argmax(y_proba[i]).astype(np.int32))])
         else:
             pred_dict['pred_class'] = np.argmax(y_proba, axis=-1).astype(np.int32)

@@ -127,8 +127,13 @@ def main(cfg: DictConfig) -> None:
         # derive class imbalance weights (per output node: train/test)
         if cfg["for_training"]:
             w_class_imbalance_map = {}
-            for class_label in set(output_sample[_target]):
-                w_class_imbalance_map[class_label] = len(output_sample)/len(output_sample.query(f'{_target}=={class_label}'))
+            try:
+                for class_label in set(output_sample[_target]):
+                    w_class_imbalance_map[class_label] = cfg['weights'][class_label]
+            except:
+                print(f'     Using auto calculated weights for label:{class_label}')
+                for class_label in set(output_sample[_target]):
+                    w_class_imbalance_map[class_label] = len(output_sample)/len(output_sample.query(f'{_target}=={class_label}'))
 
             # add training weights accounting for imbalance in data
             output_sample['w_class_imbalance'] = output_sample[_target].map(w_class_imbalance_map)

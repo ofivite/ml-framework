@@ -6,8 +6,8 @@ run_id: ???
 
 # input path & info
 year: ???
-cutoff: 0.7
-class_cutoff: 0
+# cutoff: 0.7
+# class_cutoff: 0
 input_path: 'data/lowpT_Taus/${year}/skims'
 input_filename_template: '{sample_name}.h5'
 sample_names:

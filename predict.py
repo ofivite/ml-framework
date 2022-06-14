@@ -55,7 +55,7 @@ def main(cfg: DictConfig) -> None:
                 classcut = int(cfg['class_cutoff'])
             except:
                 cutoff = None
-                print('Cutoff class is ivalid, will take max for clas pred.')
+                print('Cutoff class is invalid, will take max for clas pred.')
 
             if cutoff is not None:
                 pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models, cfgparam=cutoff, cfgclass=classcut)
