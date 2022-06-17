@@ -63,7 +63,7 @@ def main(cfg: DictConfig) -> None:
                 pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models)
 
             print(f"        storing to output file")
-            output_filename = fill_placeholders(cfg["output_filename_template"], {'{sample_name}': sample_name})
+            output_filename = fill_placeholders(cfg["output_filename_template"], {'{sample_name}': sample_name, '{cutoff}': cutoff})
             if cfg["kind"] == 'for_datacards':                
                 # extract original index
                 orig_filename = fill_placeholders(to_absolute_path(f'{cfg["orig_path"]}/{cfg["orig_filename_template"]}'), {'{sample_name}': sample_name})

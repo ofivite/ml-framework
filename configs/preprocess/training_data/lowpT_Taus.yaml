@@ -26,7 +26,7 @@ scaler:   # null to not apply scaling
 pca: null # null to not apply PCA
 weights:
   0: 1
-  1: 1
+  1: 2
 
 # output section
 output_path: data/lowpT_Taus/${year}/skims/ # relative path

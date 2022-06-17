@@ -1,11 +1,16 @@
-cd mlruns/$1
-for d in */; do
+EXPERIMENTID=8
+RUNID=3e1ca77f32b54c0c8fb4513ee955c1e2
+
+# for d in $@; do
+#     sed -e "s;%CUT%;$d;g" configs/predict/for_evaluation.txt > configs/predict/for_evaluation.yaml
+#     python predict.py --config-name for_evaluation.yaml year=2022 experiment_id=$EXPERIMENTID run_id=$RUNID
+# done
+
+cd mlruns/$EXPERIMENTID/$RUNID/artifacts/pred/
+
+for file in ./*.csv; do
     cd -
-    d="${d%/}"
-    echo {$d}
-    python predict.py --config-name for_evaluation.yaml year=2022 experiment_id=$1 run_id=$d
-    python evaluate.py experiment_id=6 run_id=$d dataset=test
-    python evaluate.py experiment_id=6 run_id=$d dataset=train
-    cd mlruns/$1
+    FILE=$(basename -- "$file")
+    python evaluate.py experiment_id=$EXPERIMENTID run_id=$RUNID dataset=${FILE%.*}
+    cd mlruns/$EXPERIMENTID/$RUNID/artifacts/pred/
 done
-cd -
