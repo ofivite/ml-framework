@@ -19,14 +19,14 @@ input_samples:
         class: 1
 
 # train/test splitter & scaler
-train_size: 0.9
+train_size: 0.8
 scaler:   # null to not apply scaling
   with_mean: True
   with_std: True
 pca: null # null to not apply PCA
 weights:
   0: 1
-  1: 2
+  1: 20
 
 # output section
 output_path: data/lowpT_Taus/${year}/skims/ # relative path

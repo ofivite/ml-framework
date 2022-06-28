@@ -78,10 +78,10 @@ def plot_curves(df, class_to_info, mlflow):
             sample_weight_map[class_label] = len(y_true)/np.sum(y_true == class_label)
         sample_weight = y_true.map(sample_weight_map)
 
-        fpr, tpr, _ = roc_curve(y_true, y_score, sample_weight=sample_weight)
-        auc_score = roc_auc_score(y_true, y_score, sample_weight=sample_weight)
-        precision, recall, _ = precision_recall_curve(y_true, y_score, sample_weight=sample_weight)
-        ap_score = average_precision_score(y_true, y_score, sample_weight=sample_weight)
+        fpr, tpr, _ = roc_curve(y_true, y_score)#, sample_weight=sample_weight)
+        auc_score = roc_auc_score(y_true, y_score)#, sample_weight=sample_weight)
+        precision, recall, _ = precision_recall_curve(y_true, y_score)#, sample_weight=sample_weight)
+        ap_score = average_precision_score(y_true, y_score)#, sample_weight=sample_weight)
 
         # Storing the curves for comparision, note very very very slow for running
         # if mlflow.active_run():
