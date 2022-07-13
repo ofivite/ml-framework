@@ -70,8 +70,8 @@ def main(cfg: DictConfig) -> None:
     if (inf_sum := np.sum(data_infs.values)) > 0:
         raise Exception(f'\nFound {inf_sum} inf values in columns: {data_infs.columns[data_infs.any(axis=0)].tolist()}. Please take care of preprocessing them.')
 
-    # clip tails in njets
-    data['njets'] = data.njets.clip(0, 5)
+    # clip tails in njets # HARD CODED njets
+    # data['njets'] = data.njets.clip(0, 5)
 
     # split data into output nodes: either train+test (for training) or sample_name based splitting (for prediction)
     if cfg["for_training"]:
@@ -127,8 +127,13 @@ def main(cfg: DictConfig) -> None:
         # derive class imbalance weights (per output node: train/test)
         if cfg["for_training"]:
             w_class_imbalance_map = {}
-            for class_label in set(output_sample[_target]):
-                w_class_imbalance_map[class_label] = len(output_sample)/len(output_sample.query(f'{_target}=={class_label}'))
+            try:
+                for class_label in set(output_sample[_target]):
+                    w_class_imbalance_map[class_label] = cfg['weights'][class_label]
+            except:
+                print(f'     Using auto calculated weights for label:{class_label}')
+                for class_label in set(output_sample[_target]):
+                    w_class_imbalance_map[class_label] = len(output_sample)/len(output_sample.query(f'{_target}=={class_label}'))
 
             # add training weights accounting for imbalance in data
             output_sample['w_class_imbalance'] = output_sample[_target].map(w_class_imbalance_map)

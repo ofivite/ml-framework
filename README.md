@@ -133,6 +133,8 @@ python predict.py --config-name for_evaluation.yaml year=2018 experiment_id=None
 
 Here, for a given input files (from `input_path`, as always preprocessed with `preprocess.py`) and a given training (from `run_id`) predictions will be logged into `.csv` files under exactly the same `run_id`. After that, simply referring to a single `run_id`, predictions will be fetched automatically from `mlflow` logs and a dashboard with various metrics and plots can be produced with `evaluate.py` script.
 
+Note that there is a parameter also to set a custom threshold for a particular class else it take the maximum score for its prediction.
+
 ## Evaluating results
 
 Given the trained model and corresponding predictions for train and test skims (produced with `for_evaluation`), one can be interested in evaluating the model's performance on these data sets. For that purpose, there is a dedicated `evaluate.py` script which is configured with a corresponding `configs/evaluate.yaml` cfg file. Basically, one needs to simply specify there usual `experiment_id`/`run_id` and the name of the `dataset` to be used for estimation ("train"/"test"). The latter will be fetched from corresponding `mlflow` run folder. That is, executing the following command:
