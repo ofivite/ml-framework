@@ -3,6 +3,7 @@ import mlflow
 import pandas as pd
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 
 import hydra
 from hydra.utils import to_absolute_path
@@ -49,6 +50,7 @@ def main(cfg: DictConfig) -> None:
             for class_id in cfg["class_to_info"]:
                 mlflow.log_metric(f'cm_{class_id}{class_id}_{confusion_norm} / {cfg["dataset"]}', cm[class_id,class_id])
 
+            rcParams.update({'figure.autolayout': True})
             fig, ax = plt.subplots(figsize=(10, 9))
             disp.plot(cmap='Blues', ax=ax)
             cm_name = f'confusion_matrix_{confusion_norm}.pdf'
