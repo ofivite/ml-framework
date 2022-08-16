@@ -68,8 +68,8 @@ def main(cfg: DictConfig) -> None:
                 # extract original index
                 orig_filename = fill_placeholders(to_absolute_path(f'{cfg["orig_path"]}/{cfg["orig_filename_template"]}'), {'{sample_name}': sample_name})
                 with uproot.open(orig_filename) as f:
-                    t = f[cfg["orig_tree_name"]] # Was hard coded to 'TauCheck'
-                    orig_index = t.arrays(['evt', 'run'], library='pd') # 'evt' and 'run' seems necessary here
+                    t = f[cfg["orig_tree_name"]]
+                    orig_index = t.arrays(['evt', 'run'], library='pd')
                     orig_index = list(map(tuple, orig_index.values))
                 
                 # reorder entries to match original indices

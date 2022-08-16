@@ -14,3 +14,8 @@ class_to_info:
     color: '163, 145, 113'
     alpha: 0.7
     bin_size: 1e-2
+
+# uses the class weights below else generates weights based on class size
+class_weight_curves:
+  0: 1
+  1: 1

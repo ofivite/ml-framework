@@ -22,6 +22,11 @@ def main(cfg: DictConfig) -> None:
     assert set(df_pred['target']) == class_ids
     class_names = []
 
+    try:
+        sample_weight = cfg['class_weight_curves']
+    except:
+        sample_weight = None
+
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
     with mlflow.start_run(experiment_id=cfg["experiment_id"], run_id=cfg["run_id"]):
         # plot density scores in each category
@@ -45,7 +50,7 @@ def main(cfg: DictConfig) -> None:
         # make confusion matrix
         print(f'\n--> Producing confusion matrix')
         for confusion_norm in ['true', 'pred', None]:
-            cm = confusion_matrix(df_pred['target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=None)
+            cm = confusion_matrix(df_pred['target'], df_pred['pred_class'], normalize=confusion_norm, sample_weight=sample_weight)
             disp = ConfusionMatrixDisplay(cm, display_labels=class_names)
             for class_id in cfg["class_to_info"]:
                 mlflow.log_metric(f'cm_{class_id}{class_id}_{confusion_norm} / {cfg["dataset"]}', cm[class_id,class_id])
@@ -61,7 +66,8 @@ def main(cfg: DictConfig) -> None:
 
         # plot ROC and precision-recall curves for each class
         print(f'\n--> Plotting ROC & PR curves')
-        for curve_name, curve_data in plot_curves(df_pred, cfg["class_to_info"], mlflow).items():
+        
+        for curve_name, curve_data in plot_curves(df_pred, cfg["class_to_info"], sample_weight).items():
             curve_data['figure'].write_image(f'{curve_name}_curve.pdf')
             mlflow.log_figure(curve_data['figure'], f'plots/{cfg["dataset"]}/{curve_name}_curve.html')
             for class_name in class_names:

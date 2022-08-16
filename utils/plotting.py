@@ -54,7 +54,7 @@ def plot_class_score(df, class_id, class_to_info, how='density', weight=None):
     else:
         raise ValueError(f'Unknown value of how={how}: should be either \"density\" or \"stacked\"')
 
-def plot_curves(df, class_to_info, mlflow):
+def plot_curves(df, class_to_info, sample_weight):
     curve_dict = {'roc': {}, 'pr': {}}
     fig_roc_curve = go.Figure()
     fig_pr_curve = go.Figure()
@@ -73,22 +73,16 @@ def plot_curves(df, class_to_info, mlflow):
         y_score = df[f'pred_class_{class_i}_proba']
 
         # weights to account for class imbalance (PR curve is sensitive to that)
-        sample_weight_map = {}
-        for class_label in set(y_true):
-            sample_weight_map[class_label] = len(y_true)/np.sum(y_true == class_label)
-        sample_weight = y_true.map(sample_weight_map)
+        if sample_weight is None:
+            sample_weight_map = {}
+            for class_label in set(y_true):
+                sample_weight_map[class_label] = len(y_true)/np.sum(y_true == class_label)
+            sample_weight = y_true.map(sample_weight_map)
 
-        fpr, tpr, _ = roc_curve(y_true, y_score)#, sample_weight=sample_weight)
-        auc_score = roc_auc_score(y_true, y_score)#, sample_weight=sample_weight)
-        precision, recall, _ = precision_recall_curve(y_true, y_score)#, sample_weight=sample_weight)
-        ap_score = average_precision_score(y_true, y_score)#, sample_weight=sample_weight)
-
-        # Storing the curves for comparision, note very very very slow for running
-        # if mlflow.active_run():
-        #     for idx in range(len(fpr)):
-        #         mlflow.log_metrics({'fpr': fpr[idx], 'tpr': tpr[idx]}, step=idx+1)
-        #     for idx in range(len(precision)):
-        #         mlflow.log_metrics({'precision': precision[idx], 'recall': recall[idx]}, step=idx+1)
+        fpr, tpr, _ = roc_curve(y_true, y_score, sample_weight=sample_weight)
+        auc_score = roc_auc_score(y_true, y_score, sample_weight=sample_weight)
+        precision, recall, _ = precision_recall_curve(y_true, y_score, sample_weight=sample_weight)
+        ap_score = average_precision_score(y_true, y_score, sample_weight=sample_weight)
 
         class_name = class_info.name
         curve_dict['roc'][f'auc_{class_name}'] = auc_score
