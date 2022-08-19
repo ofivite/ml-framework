@@ -22,9 +22,9 @@ def main(cfg: DictConfig) -> None:
     assert set(df_pred['target']) == class_ids
     class_names = []
 
-    try:
-        sample_weight = cfg['class_weight_curves']
-    except:
+    if cfg["class_weight_in_cm"]:
+        sample_weight = df_pred['w_class_imbalance']
+    else:
         sample_weight = None
 
     mlflow.set_tracking_uri(f"file://{to_absolute_path('mlruns')}")
@@ -67,7 +67,7 @@ def main(cfg: DictConfig) -> None:
         # plot ROC and precision-recall curves for each class
         print(f'\n--> Plotting ROC & PR curves')
         
-        for curve_name, curve_data in plot_curves(df_pred, cfg["class_to_info"], sample_weight).items():
+        for curve_name, curve_data in plot_curves(df_pred, cfg["class_to_info"], cfg["class_weight_curves"]).items():
             curve_data['figure'].write_image(f'{curve_name}_curve.pdf')
             mlflow.log_figure(curve_data['figure'], f'plots/{cfg["dataset"]}/{curve_name}_curve.html')
             for class_name in class_names:

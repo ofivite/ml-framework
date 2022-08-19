@@ -15,7 +15,8 @@ class_to_info:
     alpha: 0.7
     bin_size: 1e-2
 
-# uses the class weights below else generates weights based on class size
-class_weight_curves:
-  0: 1
-  1: 1
+# Use the w_class_imbalance weights for confusion matrice
+class_weight_in_cm: No
+
+# uses the class weights for curves
+class_weight_curves: No

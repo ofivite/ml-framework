@@ -54,7 +54,7 @@ def plot_class_score(df, class_id, class_to_info, how='density', weight=None):
     else:
         raise ValueError(f'Unknown value of how={how}: should be either \"density\" or \"stacked\"')
 
-def plot_curves(df, class_to_info, sample_weight):
+def plot_curves(df, class_to_info, calc_weight):
     curve_dict = {'roc': {}, 'pr': {}}
     fig_roc_curve = go.Figure()
     fig_pr_curve = go.Figure()
@@ -69,15 +69,16 @@ def plot_curves(df, class_to_info, sample_weight):
     )
 
     for class_i, class_info in class_to_info.items():
-        y_true = df['target'] == class_i
+        y_true = df['target'] == class_i # Always True or False
         y_score = df[f'pred_class_{class_i}_proba']
 
         # weights to account for class imbalance (PR curve is sensitive to that)
-        if sample_weight is None:
-            sample_weight_map = {}
+        if calc_weight:
             for class_label in set(y_true):
                 sample_weight_map[class_label] = len(y_true)/np.sum(y_true == class_label)
             sample_weight = y_true.map(sample_weight_map)
+        else:
+            sample_weight = None
 
         fpr, tpr, _ = roc_curve(y_true, y_score, sample_weight=sample_weight)
         auc_score = roc_auc_score(y_true, y_score, sample_weight=sample_weight)

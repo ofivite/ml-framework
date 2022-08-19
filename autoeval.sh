@@ -1,9 +1,9 @@
 EXPERIMENTID=9
 RUNID=01a4af9f47b449e1905ec97fb7db2734
+YEAR=2022
 
 for d in $@; do
-    sed -e "s;%CUT%;$d;g" configs/predict/for_evaluation.txt > configs/predict/for_evaluation.yaml
-    python predict.py --config-name for_evaluation.yaml year=2022 experiment_id=$EXPERIMENTID run_id=$RUNID
+    python predict.py --config-name for_evaluation.yaml year=$YEAR experiment_id=$EXPERIMENTID run_id=$RUNID +cutoff=$d
 done
 
 cd mlruns/$EXPERIMENTID/$RUNID/artifacts/pred/
