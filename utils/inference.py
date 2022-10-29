@@ -1,5 +1,6 @@
 from glob import glob
 from collections import defaultdict
+from math import remainder
 import numpy as np
 from sklearn.model_selection import LeaveOneGroupOut
 from mlflow.pyfunc import load_model
@@ -25,10 +26,29 @@ def load_models(run_folder):
     models = [load_model(f'{run_folder}/artifacts/model_{i_fold}') for i_fold in range(n_splits)]
     return models, n_splits, xtrain_split_feature
 
-def predict_folds(df, train_features, misc_features, fold_id_column, models, cfgparam=None, cfgclass=None):
+def predict_folds(df, train_features, misc_features, fold_id_column, models, cfgparam=None):
     if (n_groups:=len(set(df[fold_id_column]))) != (n_splits:=len(models)):
         raise Exception(f'Number of fold groups in the input DataFrame ({n_groups}) \
                                     is not equal to the number of splits infered from the number of models ({n_splits}).')
+    
+    sum_cutoff = 0.0
+    should_equals_one = (y_proba.shape[-1] == len(cfgparam))
+    for _, cutoff in cfgparam:
+        sum_cutoff += cutoff
+        if sum_cutoff > 1.:
+            raise ValueError("Class cutoffs doesn't add up to 1, check the yaml file for predict.")
+
+    if should_equals_one and sum_cutoff < 1:
+        raise ValueError("Class cutoffs doesn't add up to 1, check the yaml file for predict.")
+    elif not should_equals_one:
+        print("\n\n\tClass cutoffs for all the classes are not provided. Giving remaing cutoff, equally divided.")
+        remaining_cutoff = (1 - sum_cutoff) / (y_proba.shape[-1] - len(cfgparam))
+        for i in range(y_proba.shape[-1]):
+            try:
+                _ = cfgparam[i]
+            except KeyError:
+                cfgparam[i] = remaining_cutoff
+
     if n_splits > 1: # perform cross-inference
         # init structure to be written into output file
         pred_dict = defaultdict(list)
@@ -46,8 +66,29 @@ def predict_folds(df, train_features, misc_features, fold_id_column, models, cfg
             print(f"        predicting fold {i_fold}")
             y_proba = models[i_fold].predict(df_fold[train_features])
             [pred_dict[f'pred_class_{i}_proba'].append(y_proba[:,i]) for i in range(y_proba.shape[-1])]
-            pred_dict['pred_class'].append(np.argmax(y_proba, axis=-1).astype(np.int32))
-            pred_dict['pred_class_proba'].append(np.max(y_proba, axis=-1).astype(np.float32))
+            # Never tested for n_splits > 1
+            if cfgparam is not None:
+                pred_dict['pred_class'] = []
+                pred_dict['pred_class_proba'] = []
+                for i in range(y_proba.shape[0]):
+                    # Now it is possible that multiple classes cross the cutoff even though the sum equals to 1. So, we check for each cutoff indvidually.
+                    pred_class_possibility = []
+                    for j in range(y_proba.shape[-1]):
+                        if y_proba[i,j] > cfgparam[i]:
+                            pred_class_possibility.append(j)
+
+                    if len(pred_class_possibility) == 1:
+                        pred_dict['pred_class'].append(j).astype(np.int32)
+                        pred_dict['pred_class_proba'].append(y_proba[i,j]).astype(np.float32)
+                    else:
+                        max_pred = np.max(y_proba[i,pred_class_possibility]).astype(np.int32)
+                        pred_dict['pred_class'].append(np.where(y_proba[i] == max_pred)[0][0]) # taking the first max
+                        pred_dict['pred_class_proba'].append(max_pred).astype(np.float32)
+
+            else:
+                pred_dict['pred_class'] = np.argmax(y_proba, axis=-1).astype(np.int32)
+                pred_dict['pred_class_proba'] = np.max(y_proba, axis=-1).astype(np.float32)
+
             [pred_dict[f].append(df_fold[f].to_numpy()) for f in misc_features]
 
         # concatenate folds together
@@ -63,8 +104,20 @@ def predict_folds(df, train_features, misc_features, fold_id_column, models, cfg
             pred_dict['pred_class'] = []
             pred_dict['pred_class_proba'] = []
             for i in range(y_proba.shape[0]):
-                pred_dict['pred_class'].append(cfgclass if y_proba[i,cfgclass] > cfgparam else (np.argsort(y_proba[i])[-2] if np.argmax(y_proba[i]) == cfgclass else np.argmax(y_proba[i]).astype(np.int32)))
-                pred_dict['pred_class_proba'].append(y_proba[i,cfgclass].astype(np.float32) if y_proba[i,cfgclass] > cfgparam else y_proba[i, (np.argsort(y_proba[i])[-2] if np.argmax(y_proba[i]) == cfgclass else np.argmax(y_proba[i]).astype(np.int32))])
+                # Now it is possible that multiple classes cross the cutoff even though the sum equals to 1. So, we check for each cutoff indvidually.
+                pred_class_possibility = []
+                for j in range(y_proba.shape[-1]):
+                    if y_proba[i,j] > cfgparam[i]:
+                        pred_class_possibility.append(j)
+
+                if len(pred_class_possibility) == 1:
+                    pred_dict['pred_class'].append(j).astype(np.int32)
+                    pred_dict['pred_class_proba'].append(y_proba[i,j]).astype(np.float32)
+                else:
+                    max_pred = np.max(y_proba[i,pred_class_possibility]).astype(np.int32)
+                    pred_dict['pred_class'].append(np.where(y_proba[i] == max_pred)[0][0]) # taking the first max
+                    pred_dict['pred_class_proba'].append(max_pred).astype(np.float32)
+
         else:
             pred_dict['pred_class'] = np.argmax(y_proba, axis=-1).astype(np.int32)
             pred_dict['pred_class_proba'] = np.max(y_proba, axis=-1).astype(np.float32)

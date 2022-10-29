@@ -46,24 +46,18 @@ def main(cfg: DictConfig) -> None:
             cutoff = None
             # run cross-inference for folds
             try:
-                cutoff = float(cfg['cutoff'])
+                cutoff = cfg['class_cutoffs']
             except:
                 cutoff = None
-                print('Cutoff is None, will take max for clas pred.')
-
-            try:
-                classcut = int(cfg['class_cutoff'])
-            except:
-                cutoff = None
-                print('Cutoff class is invalid, will take max for clas pred.')
+                print('Cutoff class is invalid, will take max for class pred.')
 
             if cutoff is not None:
-                pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models, cfgparam=cutoff, cfgclass=classcut)
+                pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models, cfgparam=cutoff)
             else:
                 pred_dict = predict_folds(df, train_features, misc_features, fold_id_column=fold_id_column, models=models)
 
             print(f"        storing to output file")
-            output_filename = fill_placeholders(cfg["output_filename_template"], {'{sample_name}': sample_name, '{cutoff}': cutoff})
+            output_filename = fill_placeholders(cfg["output_filename_template"], {'{sample_name}': sample_name})
             if cfg["kind"] == 'for_datacards':                
                 # extract original index
                 orig_filename = fill_placeholders(to_absolute_path(f'{cfg["orig_path"]}/{cfg["orig_filename_template"]}'), {'{sample_name}': sample_name})
