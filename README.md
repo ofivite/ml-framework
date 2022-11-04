@@ -1,5 +1,4 @@
 # ML framework
-**Foreword:** this README contains practical instructions on how to setup & run the framework. For a conceptual overview of the workflow and a general idea behind its structure please have a look at [this presentation](https://drive.google.com/file/d/197bM--JW-mwuppMup6fDNFXf_wgbSvZB/view?usp=sharing). However, since the framework is being constantly developed, it is the README that will contain the most up-to-date information.
 
 ## Environment setup
 It is recommended to run the code or install complementary packages from within a dedicated [conda](https://www.anaconda.com) environment, which contains all the necessary packages and can be set up from a `conda.yaml` file.
