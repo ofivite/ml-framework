@@ -11,19 +11,21 @@ misc_features: # will be stored in the output foldfile as miscellaneous features
 
 # input section
 year: ???
-input_path: /nfs/dust/cms/user/rasp/Run/tautau/Aug21/${year} # should be absolute path
+input_path: /nfs/dust/cms/user/rasp/Run/tautau_sys_UL/${year} # should be absolute path
 input_filename_template: '{sample_name}.root' # assume the same pattern for all input sample files
-input_tree_name: TauCheck
+input_tree_name: ???
 input_samples:
-  - DYJetsToLL_M-50
-  - DY1JetsToLL_M-50
-  - DY2JetsToLL_M-50
-  - DY3JetsToLL_M-50
-  - DY4JetsToLL_M-50
-  - "EmbeddedTauTau_Run${year}A"
-  - "EmbeddedTauTau_Run${year}B"
-  - "EmbeddedTauTau_Run${year}C"
-  - "EmbeddedTauTau_Run${year}D"
+  - bbHToTauTau_yb2_M125
+  - bbHToTauTau_ybyt_M125
+  - bbHToTauTau_yt2_M125
+  - DYJetsToLL_M-50_amcatnlo
+  - DYJetsToLL_0J_amcatnlo
+  - DYJetsToLL_1J_amcatnlo
+  - DYJetsToLL_2J_amcatnlo
+  #- "EmbeddedTauTau_Run${year}A"
+  #- "EmbeddedTauTau_Run${year}B"
+  #- "EmbeddedTauTau_Run${year}C"
+  #- "EmbeddedTauTau_Run${year}D"
   # - "EmbeddedTauTau_Run${year}E"
   # - "EmbeddedTauTau_Run${year}F"
   # - "EmbeddedTauTau_Run${year}G"
@@ -36,35 +38,36 @@ input_samples:
   - ST_t-channel_top_4f
   - ST_tW_antitop_5f
   - ST_tW_top_5f
-  - SUSYGluGluToBBHToTauTau_powheg_M125
-  - "Tau_Run${year}A"
-  - "Tau_Run${year}B"
-  - "Tau_Run${year}C"
-  - "Tau_Run${year}D"
-  # - "Tau_Run${year}E"
-  # - "Tau_Run${year}F"
-  # - "Tau_Run${year}G"
-  # - "Tau_Run${year}H"
+  #- SUSYGluGluToBBHToTauTau_powheg_M125
+  - "Tau_Run2018A"
+  - "Tau_Run2018B"
+  - "Tau_Run2018C"
+  - "Tau_Run2018D"
+  #- "Tau_Run2018E"
+  #- "Tau_Run2018F"
+  #- "Tau_Run2018G"
+  #- "Tau_Run2018H"
   - TTTo2L2Nu
   - TTToHadronic
   - TTToSemiLeptonic
   - VBFHToTauTau_M125
   # - VBFHToWWTo2L2Nu_M125
-  - VVTo2L2Nu
-  - WJetsToLNu
-  - W1JetsToLNu
-  - W2JetsToLNu
-  - W3JetsToLNu
-  - W4JetsToLNu
-  # - WminusHToTauTau_M125
-  # - WplusHToTauTau_M125
+  #- VVTo2L2Nu
+  - WJetsToLNu_amcatnlo
+  - WJetsToLNu_0J_amcatnlo
+  - WJetsToLNu_1J_amcatnlo
+  - WJetsToLNu_2J_amcatnlo
+  - WminusHToTauTau_M125
+  - WplusHToTauTau_M125
+  - WWTo2L2Nu
   - WZTo2L2Q
   - WZTo3LNu
   # - ZHJ_HToWW_M125
-  # - ZHToTauTau_M125_13TeV
+  - ZHToTauTau_M125
   - ZZTo2L2Q
+  - ZZTo2L2Nu
   - ZZTo4L
-input_pipe_file: 'data/bbH/tt/UL/${year}/skims/medium_wp/input_pipe.pkl' # relative path
+input_pipe_file: 'data/bbH/tt/UL/${year}/skims/os/input_pipe.pkl' # relative path
 
 # output section
 output_path:  data/bbH/tt/UL/${year}/skims/for_prediction # relative path

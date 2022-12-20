@@ -13,7 +13,8 @@ year: ???
 orig_path: ${preprocess_cfg.input_path}
 orig_filename_template: ${preprocess_cfg.input_filename_template}
 input_path: ${preprocess_cfg.output_path}
-input_filename_template: ${preprocess_cfg.output_filename_template}.h5
+input_filename_template: ${preprocess_cfg.output_filename_template}.hdf5
+input_tree_name: ???
 sample_names: ${preprocess_cfg.input_samples}
 
 # output section
@@ -21,4 +22,4 @@ misc_features: # will be added to output ROOT file along with prediction branche
     - evt
     - run
 output_filename_template: '{sample_name}_pred.root'
-output_tree_name: TauCheck
+output_tree_name: ???

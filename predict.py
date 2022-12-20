@@ -5,6 +5,7 @@ import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
 
+import numpy as np
 import ROOT as R
 import uproot
 import pandas as pd
@@ -34,6 +35,8 @@ def main(cfg: DictConfig) -> None:
     with mlflow.start_run(experiment_id=cfg["experiment_id"], run_id=cfg["run_id"]):
         # loop over input samples
         for sample_name in cfg["sample_names"]:
+            if "_Run" in sample_name and cfg["input_tree_name"] != 'TauCheck':
+                continue
             print(f'\n--> Predicting {sample_name}')
             print(f"        loading data set")
             input_filename = fill_placeholders(cfg["input_filename_template"], {'{sample_name}': sample_name})
@@ -51,7 +54,7 @@ def main(cfg: DictConfig) -> None:
                 # extract original index
                 orig_filename = fill_placeholders(to_absolute_path(f'{cfg["orig_path"]}/{cfg["orig_filename_template"]}'), {'{sample_name}': sample_name})
                 with uproot.open(orig_filename) as f:
-                    t = f['TauCheck']
+                    t = f[cfg["input_tree_name"]]
                     orig_index = t.arrays(['evt', 'run'], library='pd')
                     orig_index = list(map(tuple, orig_index.values))
                 
@@ -62,9 +65,16 @@ def main(cfg: DictConfig) -> None:
 
                 # store predictions in RDataFrame and snapshot it into output ROOT file
                 R_df = R.RDF.MakeNumpyDataFrame(pred_dict)
-                R_df.Snapshot(cfg["output_tree_name"], output_filename)
-                mlflow.log_artifact(output_filename, artifact_path='pred')
-                del(df, R_df); os.remove(output_filename); gc.collect()
+                if cfg["output_tree_name"] == 'TauCheck':
+                    R_df.Snapshot(cfg["output_tree_name"], output_filename)
+                    mlflow.log_artifact(output_filename, artifact_path='pred')
+                    os.remove(output_filename);
+                else:
+                    opt = R.RDF.RSnapshotOptions()
+                    opt.fMode = "update"
+                    updated_file=mlflow.get_artifact_uri(artifact_path='pred')+'/'+output_filename
+                    R_df.Snapshot(cfg["output_tree_name"], updated_file,"",opt)
+                del(df, R_df); gc.collect()
             elif cfg["kind"] == 'for_evaluation':
                 df_pred = pd.DataFrame(pred_dict)
                 df_pred.to_csv(output_filename, index=False)

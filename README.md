@@ -1,4 +1,5 @@
 # ML framework
+**Foreword:** this README contains practical instructions on how to setup & run the framework. For a conceptual overview of the workflow and a general idea behind its structure please have a look at [this presentation](https://drive.google.com/file/d/197bM--JW-mwuppMup6fDNFXf_wgbSvZB/view?usp=sharing). However, since the framework is being constantly developed, it is the README that will contain the most up-to-date information.
 
 ## Environment setup
 It is recommended to run the code or install complementary packages from within a dedicated [conda](https://www.anaconda.com) environment, which contains all the necessary packages and can be set up from a `conda.yaml` file.
@@ -69,6 +70,12 @@ MY_EXPERIMENT_NAME=test
 mlflow run --experiment-name $MY_EXPERIMENT_NAME -P year=2018 -P num_iterations=5 -P n_splits=2 --no-conda .
 ```
 
+The name of the experiment is paired to an `experiment_id` used to store models and predictions, to easily find which experiment_id corresponds to the experiment name you gave just run
+```bash
+grep "name" mlruns/*/meta.yaml
+```
+
+
 *Note*: Oppositely to the manual installation, running `mlflow run` without `--no-conda` flag automatically creates a conda environment from `conda.yaml` cfg file and runs the code from there.
 
 `mlflow` takes care of logging and saving all the basic information about the training, including the model and optional metrics/artifacts (if specified in `train.py`) and **assigns each model to a unique mlflow `run_ID`**. This is by default logged into `mlruns/{experiment_ID}/{run_ID}` folder inside of the framework directory. Please **remember both `experiment_ID`** which was assigned internally to a new `$MY_EXPERIMENT_NAME` **and `run_ID`**. The former should be an integer number, which is needed as one of the input cfg parameters in the following modules of the framework. The latter is outputted in the terminal once the training is done, or alternatively, it is always possible to fetch it from `mlflow ui` (see Tracking section below).
@@ -111,7 +118,8 @@ There are two possible outputs (each configured with its own cfg file) which can
 python predict.py --config-name for_datacards.yaml year=2018 experiment_id=None run_id=None # insert the corresponding experiment/run ID here
 ```
 
-For a given model from a corresponding mlflow run it will produce in `output_path` ROOT files one per `sample_name` with predictions saved therein to a TTree named `output_tree_name`. To do that, [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class is used to snapshot a python dictionary with prediction arrays into ROOT files. After that they can be used in the next steps of the analysis, e.g. in order to produce datacards. Using [`TTree` friends](https://root.cern.ch/root/htmldoc/guides/users-guide/Trees.html#example-3-adding-friends-to-trees) might be especially helpful in this case to augment the original input ROOT files with predictions added as a new branch (`evt` in the example below is used as a common index):  
+For a given model from a corresponding mlflow run predictions are stored by mlrun into the folder corresponding to the trained model `mlruns/experiment_id/run_id/artifacts/pred`.
+`predict.py` will produce one ROOT file per `sample_name` with predictions saved therein to a TTree named `output_tree_name`. To do that, [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class is used to snapshot a python dictionary with prediction arrays into ROOT files. After that they can be used in the next steps of the analysis, e.g. in order to produce datacards. Using [`TTree` friends](https://root.cern.ch/root/htmldoc/guides/users-guide/Trees.html#example-3-adding-friends-to-trees) might be especially helpful in this case to augment the original input ROOT files with predictions added as a new branch (`evt` in the example below is used as a common index):  
 ```cpp
 TFile *f = new TFile("file_pred.root","READ");
 TFile *F = new TFile("file_main.root","READ");
@@ -145,3 +153,19 @@ will compute, plot and finally log all the plots (both interactive `plotly` html
 After that, one will be able to inspect and compare them across various runs using `mlflow` UI (see Tracking section above). To do that, please click on the run of interest (under the column `Start Time`) in the main table with all runs and scroll down to a section `Artifacts` and head over to `plots` folder. 
 
 Furthermore, in the `Metrics` section metric values, also computed inside of `evaluate.py` should appear. At the moment this includes area under ROC curve for each class (`roc_auc_*`), [average precision](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html) (`pr_average_prec_*`) and confusion matrix elements (`cm`), all of them separately for train and test samples.
+
+
+## Config file preparation
+The config files provided are analysis dependent and need to be adapted before running the framework beyond the examples provided.
+Config file reading is done via the [OmegaConf library](https://omegaconf.readthedocs.io/en/latest/index.html), a brief descrpition of its syntax is provided [here](https://omegaconf.readthedocs.io/en/latest/usage.html#access-and-manipulation). The main points to remember are as follows:
+1) The parameters in the config file can be modified via command line, in the examples below the parameters written after `--config-name bbH_tt.yaml` refer to a modification of the parameters in the `bbh_tt.yaml` file
+2) Variables defined as `???`, e.g. `year`, are mandatory and have to be defined via command line
+3) Other non-nested variables, e.g. `input_tree_name`, can be redefined via command line, for example:
+```bash
+python preprocess.py --config-path configs/preprocess/prediction_data --config-name bbH_tt.yaml year=2018
+```
+will preprocess the input trees `TauCheck` (current value specified in [configs/preprocess/prediction_data/bbH_tt.yaml](configs/preprocess/prediction_data/bbH_tt.yaml)), while
+```bash
+python preprocess.py --config-path configs/preprocess/prediction_data --config-name bbH_tt.yaml year=2018 input_tree_name=TauCheck_CMS_scale_t_1prong_13TeVUp output_tree_name=TauCheck_CMS_scale_t_1prong_13TeVUp
+```
+will preprocess a different input tree, this is relevant for systematic uncertainties carried through the analysis chain via additional trees.

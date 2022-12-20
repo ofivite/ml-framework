@@ -31,6 +31,8 @@ def main(cfg: DictConfig) -> None:
     data_samples = []
     _target = 'target' # internal target name
     for sample in cfg["input_samples"]:
+        if "_Run" in sample and cfg["input_tree_name"] != 'TauCheck':
+            continue
         if cfg["for_training"]:
             assert len(sample)==1 # for training, sample is a dictionary with 1 element, see the cfg file
             sample_name = list(sample.keys())[0]
@@ -138,16 +140,20 @@ def main(cfg: DictConfig) -> None:
 
         # apply preprocessing pipeline
         output_sample[cont_features] = input_pipe.transform(output_sample[cont_features].values.astype('float32'))
-
+        if 'evt' in misc_features:
+            output_sample.loc[:,'evt']=output_sample['evt'].astype(np.uint64)
+        if 'run' in misc_features:
+            output_sample.loc[:,'run']=output_sample['run'].astype(np.uint32)       
+        
         # store into a hdf5 fold file
         output_filename = f'{output_path}/{output_sample_name}'
-        if os.path.exists(f'{output_filename}.h5'):
-            os.remove(f'{output_filename}.h5')
+        if os.path.exists(f'{output_filename}.hdf5'):
+            os.remove(f'{output_filename}.hdf5')
         group_names = ['cont_features', 'cat_features', 'misc_features', 'targets']
         group_list = [cont_features, cat_features, misc_features, [_target]]
         for group_name, group in zip(group_names, group_list):
             if group is not None:
-                output_sample[group].to_hdf(f'{output_filename}.h5', key=group_name, mode='a')
+                output_sample[group].to_hdf(f'{output_filename}.hdf5', key=group_name, mode='a')
     
     # save input config
     OmegaConf.save(config=cfg, f=f'{output_path}/cfg.yaml')
