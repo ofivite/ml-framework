@@ -1,0 +1,9 @@
+YEAR=2018
+EXPID=10
+RUNID=ca4621c3ee2d4fb9ac60babf05a3db06
+
+for TREE in TauCheck TauCheck_CMS_scale_t_1prong_13TeVUp TauCheck_CMS_scale_t_1prong_13TeVDown TauCheck_CMS_scale_t_1prong1pizero_13TeVUp TauCheck_CMS_scale_t_1prong1pizero_13TeVDown TauCheck_CMS_scale_t_3prong_13TeVUp TauCheck_CMS_scale_t_3prong_13TeVDown TauCheck_CMS_scale_t_3prong1pizero_13TeVUp TauCheck_CMS_scale_t_3prong1pizero_13TeVDown TauCheck_CMS_scale_j_JES_13TeVDown TauCheck_CMS_scale_j_JES_13TeVUp TauCheck_CMS_res_j_13TeVDown TauCheck_CMS_res_j_13TeVUp TauCheck_CMS_scale_met_unclustered_13TeVDown TauCheck_CMS_scale_met_unclustered_13TeVUp
+do
+    python preprocess.py --config-path configs/preprocess/prediction_data --config-name bbH_tt.yaml year=$YEAR input_tree_name=$TREE
+    python predict.py --config-name for_datacards.yaml year=$YEAR experiment_id=$EXPID run_id=$RUNID input_tree_name=$TREE output_tree_name=$TREE
+done
