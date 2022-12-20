@@ -1,5 +1,4 @@
 # ML framework
-**Foreword:** this README contains practical instructions on how to setup & run the framework. For a conceptual overview of the workflow and a general idea behind its structure please have a look at [this presentation](https://drive.google.com/file/d/197bM--JW-mwuppMup6fDNFXf_wgbSvZB/view?usp=sharing). However, since the framework is being constantly developed, it is the README that will contain the most up-to-date information.
 
 ## Environment setup
 It is recommended to run the code or install complementary packages from within a dedicated [conda](https://www.anaconda.com) environment, which contains all the necessary packages and can be set up from a `conda.yaml` file.
@@ -40,7 +39,7 @@ The newly created kernel can now be activated in the Jupyter selection menu (top
 ## Data preprocessing
 As the very first step, input ROOT files are preprocessed and skimmed within the framework prior to training. This is done with `preprocess.py` script, which combines the input set of ROOT files (also referred to as _nodes_) into a single pandas DataFrame, then performs necessary transformations/additions/filtering, then splits the dataframe into the output nodes and stores each into `hdf5` file. Conceptually, the preprocessing stage can be viewed as a _dataflow_, where input source files are firstly merged into a single stream which then flows through a series of transformations and splits towards its end, which would be a storage into `hdf5` files.
 
-There are two paths in this preprocessing dataflow: the one to skim the data set for training and the other to skim it to make predictions for final statistical inference. This is done by the same `preprocessing.py` script and the flag `for_training` in the input cfg file indicates the path to be followed within the script. Therefore, there are two configs which define what and how needs to be skimmed, each corresponding to either training or prediction paths: `configs/preprocess/training_data/*.yaml` and  `configs/preprocess/prediction_data/*.yaml` respectively. These configs are passed to `preprocessing.py` with [`hydra`](https://hydra.cc/docs/intro), see its documentation for more details on the usage.
+There are two paths in this preprocessing dataflow: the one to skim the data set for training and the other to skim it to make predictions for final statistical inference. This is done by the same `preprocessing.py` script and the flag `for_training` in the input cfg file indicates the path to be followed within the script. Therefore, there are two configs which define what and how needs to be skimmed, each corresponding to either training or prediction paths: `configs/preprocess/training_data/*.yaml` and  `configs/preprocess/prediction_data/*.yaml` respectively. These configs are passed to `preprocessing.py` with [`hydra`](https://hydra.cc/docs/intro), see its documentation for more details on the usage, a few suggestions are provided in the [Config file preparation](#config-file-preparation) section.
 
 For example, in order to prepare 2018 data for bbH analysis in the tautau channel for training one needs to execute:
 
@@ -74,7 +73,6 @@ The name of the experiment is paired to an `experiment_id` used to store models 
 ```bash
 grep "name" mlruns/*/meta.yaml
 ```
-
 
 *Note*: Oppositely to the manual installation, running `mlflow run` without `--no-conda` flag automatically creates a conda environment from `conda.yaml` cfg file and runs the code from there.
 
