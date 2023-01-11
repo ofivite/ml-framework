@@ -116,7 +116,7 @@ There are two possible outputs (each configured with its own cfg file) which can
 python predict.py --config-name for_datacards.yaml year=2018 experiment_id=None run_id=None # insert the corresponding experiment/run ID here
 ```
 
-For a given model from a corresponding mlflow run predictions are stored by mlrun into the folder corresponding to the trained model `mlruns/experiment_id/run_id/artifacts/pred`.
+For a given model from a corresponding mlflow run predictions are stored by mlflow into the folder corresponding to the trained model `mlruns/experiment_id/run_id/artifacts/pred`.
 `predict.py` will produce one ROOT file per `sample_name` with predictions saved therein to a TTree named `output_tree_name`. To do that, [`RDataFrame`](https://root.cern/doc/master/classROOT_1_1RDataFrame.html) class is used to snapshot a python dictionary with prediction arrays into ROOT files. After that they can be used in the next steps of the analysis, e.g. in order to produce datacards. Using [`TTree` friends](https://root.cern.ch/root/htmldoc/guides/users-guide/Trees.html#example-3-adding-friends-to-trees) might be especially helpful in this case to augment the original input ROOT files with predictions added as a new branch (`evt` in the example below is used as a common index):  
 ```cpp
 TFile *f = new TFile("file_pred.root","READ");
