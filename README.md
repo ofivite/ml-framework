@@ -1,4 +1,9 @@
-# ML framework
+# [ARCHIVED] ML framework
+**NB:** the archived version of this repo is fully functional but no longer mantained and developed.
+------
+
+## Description
+General-purpose framework to solve event classification problems in the particle physics domain ⚛
 
 ## Environment setup
 It is recommended to run the code or install complementary packages from within a dedicated [conda](https://www.anaconda.com) environment, which contains all the necessary packages and can be set up from a `conda.yaml` file.
